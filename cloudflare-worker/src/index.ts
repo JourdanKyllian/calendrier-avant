@@ -319,11 +319,16 @@ export default {
         local = getLocalClock('Europe/Paris');
       }
 
+      const [, monthStr, dayStr] = local.dateStr.split('-');
+      const month = Number(monthStr);
+      const day = Number(dayStr);
+      if (month !== 12 || day < 1 || day > 24) continue;
+
       if (sub.lastReminderDate === local.dateStr) continue;
       if (local.minutes >= targetMinutes && local.minutes < targetMinutes + 5) {
         const sent = await sendNgswPush(env, sub, idToken, {
-          title: '🍫 N’oublie pas ton chocolat !',
-          body: 'Ta case du calendrier de l’Avent t’attend aujourd’hui.',
+          title: `🍫 Case ${day} décembre disponible !`,
+          body: `Ta case ${day} du calendrier de l’Avent t’attend aujourd’hui.`,
           url: '/tabs/calendar',
         })
           .then((r) => r.ok)

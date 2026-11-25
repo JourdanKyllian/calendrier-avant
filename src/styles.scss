@@ -42,17 +42,6 @@ ion-content::part(background) {
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='%23c68b2c' fill-opacity='0.06'%3E%3Cpath d='M36 10l1.6 4.4L42 16l-4.4 1.6L36 22l-1.6-4.4L30 16l4.4-1.6z'/%3E%3Ccircle cx='12' cy='52' r='1.5'/%3E%3Ccircle cx='60' cy='44' r='1.2'/%3E%3C/g%3E%3C/svg%3E");
 }
 
-.ios-top-edge-anchor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: #2c1810;
-  z-index: 99999;
-  pointer-events: none;
-}
-
 ion-header {
   position: relative;
   z-index: 10;
@@ -98,7 +87,8 @@ ion-toolbar ion-title {
 }
 
 ion-header ion-toolbar:first-of-type {
-  --padding-top: 6px;
+  --padding-top: max(8px, env(safe-area-inset-top));
+  --padding-bottom: 8px;
 }
 
 .header-ios .header-background,
