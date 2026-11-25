@@ -31,3 +31,32 @@
 [debug] [2026-11-25T09:16:44.590Z] Checked if tokens are valid: true, expires at: 1795601175790
 [debug] [2026-11-25T09:16:44.590Z] Checked if tokens are valid: true, expires at: 1795601175790
 [debug] [2026-11-25T09:16:44.591Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/calendrier-de-avent/databases/(default) [none]
+[debug] [2026-11-25T09:16:45.363Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/calendrier-de-avent/databases/(default) 200
+[debug] [2026-11-25T09:16:45.363Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/calendrier-de-avent/databases/(default) {"name":"projects/calendrier-de-avent/databases/(default)","uid":"92e70346-062b-47e6-ab70-ed59064ea26c","createTime":"2026-11-23T13:46:42.177182Z","updateTime":"2026-11-23T13:46:42.177182Z","locationId":"nam5","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2026-11-25T08:16:45.305899Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"s","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"ILKDv8nkopgDMLSVoIGtn5gD"}
+[info] i  cloud.firestore: checking firestore.rules for compilation errors... 
+[debug] [2026-11-25T09:16:45.364Z] Checked if tokens are valid: true, expires at: 1795601175790
+[debug] [2026-11-25T09:16:45.364Z] Checked if tokens are valid: true, expires at: 1795601175790
+[debug] [2026-11-25T09:16:45.364Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/calendrier-de-avent:test [none]
+[debug] [2026-11-25T09:16:45.364Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/calendrier-de-avent:test [omitted]
+[debug] [2026-11-25T09:16:46.215Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/calendrier-de-avent:test 200
+[debug] [2026-11-25T09:16:46.215Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/calendrier-de-avent:test {}
+[info] ✔  cloud.firestore: rules file firestore.rules compiled successfully 
+[debug] [2026-11-25T09:16:46.217Z] Checked if tokens are valid: true, expires at: 1795601175790
+[debug] [2026-11-25T09:16:46.217Z] Checked if tokens are valid: true, expires at: 1795601175790
+[debug] [2026-11-25T09:16:46.217Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/calendrier-de-avent/sites/calendrier-de-avent [none]
+[debug] [2026-11-25T09:16:47.408Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/calendrier-de-avent/sites/calendrier-de-avent 200
+[debug] [2026-11-25T09:16:47.409Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/calendrier-de-avent/sites/calendrier-de-avent {"name":"projects/calendrier-de-avent/sites/calendrier-de-avent","defaultUrl":"https://calendrier-de-avent.web.app","type":"DEFAULT_SITE"}
+[debug] [2026-11-25T09:16:47.410Z] Checked if tokens are valid: true, expires at: 1795601175790
+[debug] [2026-11-25T09:16:47.410Z] Checked if tokens are valid: true, expires at: 1795601175790
+[debug] [2026-11-25T09:16:47.410Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/calendrier-de-avent/sites/calendrier-de-avent/versions [none]
+[debug] [2026-11-25T09:16:47.410Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/calendrier-de-avent/sites/calendrier-de-avent/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2026-11-25T09:16:48.967Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/calendrier-de-avent/sites/calendrier-de-avent/versions 200
+[debug] [2026-11-25T09:16:48.967Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/calendrier-de-avent/sites/calendrier-de-avent/versions {"name":"projects/calendrier-de-avent/sites/calendrier-de-avent/versions/758881bbfc77ca69","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2026-11-25T09:16:48.968Z] Checked if tokens are valid: true, expires at: 1795601175790
+[debug] [2026-11-25T09:16:48.968Z] Checked if tokens are valid: true, expires at: 1795601175790
+[debug] [2026-11-25T09:16:48.968Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/calendrier-de-avent/releases pageSize=10&pageToken=
+[debug] [2026-11-25T09:16:49.829Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/calendrier-de-avent/releases 200
+[debug] [2026-11-25T09:16:49.829Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/calendrier-de-avent/releases {"releases":[{"name":"projects/calendrier-de-avent/releases/cloud.firestore","rulesetName":"projects/calendrier-de-avent/rulesets/b6868738-3ffc-4be7-aaf8-91cadbe19174","createTime":"2026-11-23T13:46:44.069199Z","updateTime":"2026-11-25T09:11:39.404671Z"}]}
+[debug] [2026-11-25T09:16:49.830Z] Checked if tokens are valid: true, expires at: 1795601175790
+[debug] [2026-11-25T09:16:49.830Z] Checked if tokens are valid: true, expires at: 1795601175790
+[debug] [2026-11-25T09:16:49.830Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/calendrier-de-avent/rulesets/b6868738-3ffc-4be7-aaf8-91cadbe19174 [none]
