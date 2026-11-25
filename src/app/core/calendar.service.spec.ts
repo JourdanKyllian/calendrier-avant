@@ -224,16 +224,6 @@ describe('CalendarService batch undo (Firebase store)', () => {
     expect(el.querySelectorAll('.day-pill').length).toBe(24);
     expect(el.textContent).toContain('Toutes (24)');
     expect(el.textContent).toContain('Enregistrer Jour 1');
-    expect(el.textContent).toContain('Calendrier (24)');
-    expect(el.textContent).toContain('Stock (2)');
-
-    const stockTabBtn = el.querySelector('ion-segment-button[value="stock"]') as HTMLElement;
-    stockTabBtn.click();
-    modalFixture.componentInstance.activeTab.set('stock');
-    await modalFixture.whenStable();
-
-    expect(el.textContent).toContain('Réserve globale de chocolats');
-    expect(el.textContent).toContain('Kinder Bueno');
-    expect(el.textContent).toContain('Ajouter un chocolat au stock');
+    expect(el.textContent).toContain('Cases du calendrier (0/24)');
   });
 });

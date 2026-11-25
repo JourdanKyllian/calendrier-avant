@@ -5,16 +5,16 @@ Permanent guidelines for the **ChocoAvent** Angular + Ionic PWA (`calendrier-ave
 <product_and_roles>
 - **Domain**: Family Advent chocolate calendar PWA (`24` days) with real-time Firestore sync and Cloudflare Worker Web Push notifications.
 - **Roles**:
-  - **Members**: Authenticate with a 4-digit PIN, claim their assigned day's chocolate (with a timed undo window), view stats/equity (`Suivi`), browse logs (`Journal`), and manage PIN & push reminders (`Compte`).
-  - **Supervisor** (`isSupervisor === true`): Read-only for claiming chocolates, with a prominent **Gérer** button opening `SupervisorDaysModalComponent` divided into two explicit tabs: `Calendrier (24)` (assign chocolate + member per day) and `Stock` (manage chocolate inventory, placed vs surplus counts, add new chocolates).
+  - **Members**: Authenticate with a 4-digit PIN, claim their assigned day's chocolate (with a timed undo window), view their personal stock & surplus (`Stock`), browse logs/trades (`Journal`), and manage PIN & push reminders (`Compte`).
+  - **Supervisor** (`isSupervisor === true`): Read-only for claiming chocolates; manages global chocolate stock directly in the `Stock` tab (`Réserve globale`, `Placés` vs `Surplus`, add chocolates) and uses the prominent **Gérer** button on `Calendrier` to open `SupervisorDaysModalComponent` for assigning chocolates to the 24 days (with stock-overrun protection).
 </product_and_roles>
 
 <navigation_and_routes>
 - **Login**: `/login` (`LoginPage`, guarded by `guestGuard`).
 - **Authenticated Tabs** (`TabsPage` at `/tabs/*`, guarded by `authGuard`):
   - `Calendrier` (`/tabs/calendar`)
-  - `Suivi` (`/tabs/stats`)
-  - `Journal` (`/tabs/history`)
+  - `Stock` (`/tabs/stats` — personal stock for members, global reserve management for supervisor)
+  - `Journal` (`/tabs/history` — trades & family progress/history)
   - `Compte` (`/tabs/profile`)
 - Keep each tab focused on its core job; do not duplicate supervisor management or account settings across unrelated tabs.
 </navigation_and_routes>

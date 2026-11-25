@@ -187,6 +187,88 @@ ion-progress-bar {
   color: #ffffff;
 }
 
+.card-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: #675248;
+  line-height: 1.4;
+}
+
+.supervisor-stock-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--ca-surface-subtle, #f5ede3);
+  border: 1px solid var(--ca-border, rgba(44, 24, 16, 0.1));
+}
+
+.stock-meta {
+  display: block;
+  font-size: 0.74rem;
+  color: #675248;
+}
+
+.stock-edit-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mini-step {
+  width: 36px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--ca-border-strong, rgba(44, 24, 16, 0.2));
+  background: #ffffff;
+  color: #8b2635;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.stock-num-input {
+  width: 60px;
+  height: 38px;
+  text-align: center;
+  border-radius: 10px;
+  border: 1px solid var(--ca-border-strong, rgba(44, 24, 16, 0.2));
+  background: #ffffff;
+  color: #2c1810;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.add-choco-form {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.add-choco-form ion-input {
+  flex: 1;
+  min-width: 150px;
+}
+
+.add-qty {
+  height: 44px;
+}
+
+.pre-advent-note {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff8ea;
+  border: 1px dashed rgba(198, 139, 44, 0.5);
+  color: #5b463c;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
 .surplus-card {
   border: 1px dashed rgba(198, 139, 44, 0.45);
 }
@@ -210,7 +292,89 @@ ion-progress-bar {
     align-items: stretch;
   }
 
-  .stats-cards-grid .surplus-card {
+  .stats-cards-grid .card-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: #675248;
+  line-height: 1.4;
+}
+
+.supervisor-stock-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--ca-surface-subtle, #f5ede3);
+  border: 1px solid var(--ca-border, rgba(44, 24, 16, 0.1));
+}
+
+.stock-meta {
+  display: block;
+  font-size: 0.74rem;
+  color: #675248;
+}
+
+.stock-edit-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mini-step {
+  width: 36px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--ca-border-strong, rgba(44, 24, 16, 0.2));
+  background: #ffffff;
+  color: #8b2635;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.stock-num-input {
+  width: 60px;
+  height: 38px;
+  text-align: center;
+  border-radius: 10px;
+  border: 1px solid var(--ca-border-strong, rgba(44, 24, 16, 0.2));
+  background: #ffffff;
+  color: #2c1810;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.add-choco-form {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.add-choco-form ion-input {
+  flex: 1;
+  min-width: 150px;
+}
+
+.add-qty {
+  height: 44px;
+}
+
+.pre-advent-note {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff8ea;
+  border: 1px dashed rgba(198, 139, 44, 0.5);
+  color: #5b463c;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.surplus-card {
     grid-column: 1 / -1;
   }
 }

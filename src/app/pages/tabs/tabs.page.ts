@@ -11,8 +11,8 @@ import {
 import { addIcons } from 'ionicons';
 import {
   arrowUndoOutline,
-  barChartOutline,
   calendarOutline,
+  cubeOutline,
   personCircleOutline,
   timeOutline,
 } from 'ionicons/icons';
@@ -43,7 +43,7 @@ export class TabsPage {
   constructor() {
     addIcons({
       calendarOutline,
-      barChartOutline,
+      cubeOutline,
       timeOutline,
       personCircleOutline,
       arrowUndoOutline,

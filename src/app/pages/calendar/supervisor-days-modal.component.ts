@@ -7,22 +7,17 @@ import {
   IonHeader,
   IonIcon,
   IonInput,
-  IonLabel,
-  IonSegment,
-  IonSegmentButton,
   IonTitle,
   IonToast,
   IonToolbar,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { addOutline, closeOutline, trashOutline } from 'ionicons/icons';
+import { closeOutline, trashOutline } from 'ionicons/icons';
 import { CalendarConfigService } from '../../core/calendar-config.service';
 import { ADVENT_DAY_NUMBERS } from '../../core/equity';
-import { ChocolateCatalogItem } from '../../core/models';
 import { ChocolateIconComponent } from '../../shared/chocolate-icon.component';
 
 type DayFilter = 'all' | 'missing' | 'filled';
-type AdminTab = 'calendar' | 'stock';
 
 @Component({
   selector: 'app-supervisor-days-modal',
@@ -38,9 +33,6 @@ type AdminTab = 'calendar' | 'stock';
     IonContent,
     IonIcon,
     IonInput,
-    IonSegment,
-    IonSegmentButton,
-    IonLabel,
     IonToast,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,27 +42,16 @@ type AdminTab = 'calendar' | 'stock';
   template: `
     <ion-header>
       <ion-toolbar>
-        <ion-title>Gestion ({{ configService.configuredCount() }}/24)</ion-title>
+        <ion-title>Cases du calendrier ({{ configService.configuredCount() }}/24)</ion-title>
         <ion-buttons slot="end">
           <ion-button (click)="closed.emit()" aria-label="Fermer">
             <ion-icon name="close-outline" slot="icon-only"></ion-icon>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
-      <div class="admin-tabs-bar">
-        <ion-segment [value]="activeTab()" (ionChange)="activeTab.set($any($event.detail.value))">
-          <ion-segment-button value="calendar">
-            <ion-label>Calendrier (24)</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="stock">
-            <ion-label>Stock ({{ configService.chocolates().length }})</ion-label>
-          </ion-segment-button>
-        </ion-segment>
-      </div>
     </ion-header>
 
     <ion-content class="ion-padding admin-content">
-      @if (activeTab() === 'calendar') {
         <div class="filter-bar">
           <button
             type="button"
@@ -206,100 +187,6 @@ type AdminTab = 'calendar' | 'stock';
             Enregistrer Jour {{ selectedDay() }}
           </ion-button>
         </div>
-      } @else {
-        <div class="stock-list-card">
-          <h3>Réserve globale de chocolats</h3>
-          <p class="stock-hint">
-            Saisis la quantité totale achetée. Les chocolats placés dans le calendrier sont déduits automatiquement pour calculer ton surplus échangeable.
-          </p>
-
-          @if (configService.chocolates().length > 0) {
-            <div class="stock-rows">
-              @for (item of configService.chocolates(); track item.id) {
-                @let used = configService.usedCountForChocolate(item);
-                @let surplus = item.totalCount > 0 ? Math.max(0, item.totalCount - used) : null;
-                <div class="stock-row">
-                  <div class="stock-row-info">
-                    <app-chocolate-icon [name]="item.name" [size]="24" />
-                    <div>
-                      <strong>{{ item.name }}</strong>
-                      <span class="stock-meta">
-                        Placés : {{ used }}
-                        @if (surplus !== null) {
-                          • Surplus : <strong>{{ surplus }}</strong>
-                        } @else {
-                          • Sans limite
-                        }
-                      </span>
-                    </div>
-                  </div>
-
-                  <div class="stock-edit-controls">
-                    <button
-                      type="button"
-                      class="mini-step"
-                      [disabled]="busy()"
-                      (click)="stepStock(item, -1)"
-                      aria-label="Retirer 1"
-                    >
-                      −
-                    </button>
-                    <input
-                      type="number"
-                      min="0"
-                      max="1000"
-                      class="stock-num-input"
-                      [value]="draftStock(item)"
-                      (input)="setDraftStock(item.id, $any($event.target).value)"
-                    />
-                    <button
-                      type="button"
-                      class="mini-step"
-                      [disabled]="busy()"
-                      (click)="stepStock(item, 1)"
-                      aria-label="Ajouter 1"
-                    >
-                      +
-                    </button>
-                    <ion-button
-                      size="small"
-                      [disabled]="busy()"
-                      (click)="saveStock(item)"
-                    >
-                      OK
-                    </ion-button>
-                  </div>
-                </div>
-              }
-            </div>
-          } @else {
-            <p class="stock-empty">Aucun chocolat enregistré en base pour le moment.</p>
-          }
-        </div>
-
-        <div class="editor-card add-choco-card">
-          <h3>Ajouter un chocolat au stock</h3>
-          <div class="add-choco-form">
-            <ion-input
-              fill="outline"
-              placeholder="Nom (ex. Kinder Bueno)"
-              [(ngModel)]="newChocoName"
-            ></ion-input>
-            <input
-              type="number"
-              min="0"
-              max="1000"
-              class="stock-num-input add-qty"
-              [(ngModel)]="newChocoTotal"
-              aria-label="Quantité totale"
-            />
-            <ion-button [disabled]="busy()" (click)="addChocolate()">
-              <ion-icon name="add-outline" slot="start"></ion-icon>
-              Ajouter
-            </ion-button>
-          </div>
-        </div>
-      }
 
       <ion-toast
         [isOpen]="toastMessage() !== ''"
@@ -698,10 +585,8 @@ type AdminTab = 'calendar' | 'stock';
 })
 export class SupervisorDaysModalComponent {
   protected readonly configService = inject(CalendarConfigService);
-  protected readonly Math = Math;
   readonly closed = output<void>();
 
-  readonly activeTab = signal<AdminTab>('calendar');
   readonly filter = signal<DayFilter>('all');
   readonly selectedDay = signal<number>(1);
   readonly chocolateChoice = signal<string>('');
@@ -709,9 +594,6 @@ export class SupervisorDaysModalComponent {
   readonly busy = signal(false);
   readonly toastMessage = signal('');
   customChocolate = '';
-  newChocoName = '';
-  newChocoTotal = 0;
-  private readonly draftStocks = signal<Record<string, number>>({});
 
   readonly filteredDays = computed(() => {
     const f = this.filter();
@@ -726,51 +608,8 @@ export class SupervisorDaysModalComponent {
   readonly selectedConfig = computed(() => this.configService.getDayConfig(this.selectedDay()));
 
   constructor() {
-    addIcons({ closeOutline, trashOutline, addOutline });
+    addIcons({ closeOutline, trashOutline });
     this.selectDay(1);
-  }
-
-  draftStock(item: ChocolateCatalogItem): number {
-    const map = this.draftStocks();
-    return map[item.id] ?? item.totalCount;
-  }
-
-  setDraftStock(id: string, raw: string): void {
-    const val = Math.max(0, Math.min(1000, Math.floor(Number(raw) || 0)));
-    this.draftStocks.update((m) => ({ ...m, [id]: val }));
-  }
-
-  async stepStock(item: ChocolateCatalogItem, delta: number): Promise<void> {
-    const next = Math.max(0, Math.min(1000, this.draftStock(item) + delta));
-    this.draftStocks.update((m) => ({ ...m, [item.id]: next }));
-    await this.saveStock(item);
-  }
-
-  async saveStock(item: ChocolateCatalogItem): Promise<void> {
-    this.busy.set(true);
-    try {
-      const next = this.draftStock(item);
-      await this.configService.updateChocolateStock(item.id, next);
-      this.toastMessage.set(`Stock ${item.name} enregistré (${next}).`);
-    } catch (err: unknown) {
-      this.toastMessage.set(err instanceof Error ? err.message : 'Erreur stock.');
-    } finally {
-      this.busy.set(false);
-    }
-  }
-
-  async addChocolate(): Promise<void> {
-    this.busy.set(true);
-    try {
-      await this.configService.addChocolate(this.newChocoName, Number(this.newChocoTotal) || 0);
-      this.toastMessage.set(`${this.newChocoName.trim()} ajouté au stock.`);
-      this.newChocoName = '';
-      this.newChocoTotal = 0;
-    } catch (err: unknown) {
-      this.toastMessage.set(err instanceof Error ? err.message : 'Erreur ajout.');
-    } finally {
-      this.busy.set(false);
-    }
   }
 
   selectDay(dayNum: number): void {
