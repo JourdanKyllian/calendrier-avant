@@ -55,7 +55,9 @@
 .composer-select {
   --border-radius: 12px;
   --background: var(--ca-surface-subtle, #f5ede3);
-  min-height: 48px;
+  --padding-start: 14px;
+  --padding-end: 14px;
+  min-height: 52px;
   font-size: 0.86rem;
   font-weight: 600;
 }
@@ -85,10 +87,21 @@
 
 .trade-warning {
   margin: 0;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-radius: 10px;
   background: rgba(184, 51, 42, 0.1);
   color: #8b2635;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.pre-advent-note {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff8ea;
+  border: 1px dashed rgba(198, 139, 44, 0.5);
+  color: #5b463c;
   font-size: 0.8rem;
   font-weight: 600;
 }
@@ -113,6 +126,8 @@
 .inline-select {
   --border-radius: 10px;
   --background: #ffffff;
+  --padding-start: 12px;
+  --padding-end: 12px;
   font-size: 0.85rem;
 }
 

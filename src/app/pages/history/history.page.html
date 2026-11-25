@@ -85,7 +85,11 @@
             }
           </div>
 
-          @if (myAvailableStock().length === 0) {
+          @if (calendarService.unlockedDaysCount() === 0) {
+            <p class="pre-advent-note">
+              🎄 Le calendrier démarre le 1er décembre — les échanges s'activeront dès l'ouverture de la première case.
+            </p>
+          } @else if (myAvailableStock().length === 0) {
             <p class="trade-warning">
               Tu n'as aucun chocolat disponible à échanger (tout est déjà mangé ou réservé).
             </p>

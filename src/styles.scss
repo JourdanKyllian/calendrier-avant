@@ -53,30 +53,48 @@ ion-content::part(background) {
   pointer-events: none;
 }
 
-ion-header,
-ion-toolbar {
-  --background: #2c1810;
-  --color: #fff8f0;
-  --opacity: 1;
-  --border-width: 0 !important;
-  background: #2c1810 !important;
+ion-header {
+  position: relative;
+  z-index: 10;
+  background: #2c1810;
   border-bottom: 1px solid rgba(198, 139, 44, 0.35);
   box-shadow: none !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
 
-ion-toolbar ion-title {
-  font-family: var(--ca-font-display, Georgia, serif);
-  font-weight: 700;
-  letter-spacing: -0.01em;
+ion-toolbar {
+  --background: #2c1810;
+  --color: #fff8f0;
+  --opacity: 1;
+  --border-width: 0 !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 
 ion-toolbar::part(background) {
   background: #2c1810 !important;
   opacity: 1 !important;
+  z-index: 0 !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
+}
+
+ion-toolbar::part(container) {
+  position: relative;
+  z-index: 2;
+}
+
+ion-toolbar ion-title {
+  position: relative;
+  z-index: 3;
+  color: #fff8f0;
+  opacity: 1 !important;
+  filter: none !important;
+  font-family: var(--ca-font-display, Georgia, serif);
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 ion-header ion-toolbar:first-of-type {
