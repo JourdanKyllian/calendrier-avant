@@ -99,6 +99,12 @@
       </div>
     }
 
+    @if (calendarService.unlockedDaysCount() === 0) {
+      <div class="pre-advent-banner" role="status">
+        🎄 Le calendrier démarre le <strong>1er décembre</strong> — l'ouverture des cases et les échanges s'activeront automatiquement ce jour-là.
+      </div>
+    }
+
     <div class="calendar-grid">
       @for (dayNum of dayNumbers; track dayNum) {
         @let status = dayStatus(dayNum);
