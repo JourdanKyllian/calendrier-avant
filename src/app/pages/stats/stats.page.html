@@ -1,0 +1,167 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Suivi familial</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card class="overview-card">
+    <ion-card-content class="overview-grid">
+      <div>
+        <span class="meta">Débloquées</span>
+        <strong>{{ calendarService.unlockedDaysCount() }} / 24</strong>
+      </div>
+      <div>
+        <span class="meta">À venir</span>
+        <strong>{{ 24 - calendarService.unlockedDaysCount() }}</strong>
+      </div>
+      <div>
+        <span class="meta">Cases réclamées</span>
+        <strong>{{ calendarService.totalClaimsCount() }}</strong>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <div class="stats-cards-grid">
+  @for (stat of calendarService.memberStats(); track stat.member.uid) {
+    <ion-card>
+      <ion-card-header>
+        <div class="member-row">
+          <div class="member-title">
+            <span class="member-avatar" [style.background]="stat.member.color">
+              {{ stat.member.emoji }}
+            </span>
+            <div>
+              <ion-card-title>{{ stat.member.name }}</ion-card-title>
+              <span class="member-sub">
+                {{ stat.daysTakenCount }} / {{ stat.unlockedDaysCount }} cases débloquées
+              </span>
+            </div>
+          </div>
+
+          <ion-badge [color]="stat.daysToRecoverCount > 0 ? 'secondary' : 'success'">
+            {{ recoverLabel(stat.daysToRecoverCount) }}
+          </ion-badge>
+        </div>
+      </ion-card-header>
+
+      <ion-card-content>
+        <ion-progress-bar
+          [value]="progressRatio(stat.daysTakenCount, stat.unlockedDaysCount)"
+          color="primary"
+        ></ion-progress-bar>
+
+        <div class="stats-section">
+          <span class="section-label">Cases déjà prises</span>
+          @if (stat.takenDayNumbers.length > 0) {
+            <div class="breakdown-chips">
+              @for (dayNum of stat.takenDayNumbers; track dayNum) {
+                <span class="taken-pill">#{{ dayNum }}</span>
+              }
+            </div>
+          } @else {
+            <p class="none-yet">Aucune case réclamée pour le moment.</p>
+          }
+        </div>
+
+        <div class="stats-section">
+          <span class="section-label">Manque à récupérer</span>
+          @if (stat.missingDayNumbers.length > 0) {
+            <div class="breakdown-chips">
+              @for (dayNum of stat.missingDayNumbers; track dayNum) {
+                <span class="missing-pill">Case #{{ dayNum }}</span>
+              }
+            </div>
+          } @else {
+            <p class="all-done">✓ À jour sur toutes les cases débloquées.</p>
+          }
+        </div>
+        <div class="stats-section">
+          <span class="section-label">Stock disponible (non mangés)</span>
+          @let stock = inventoryService.getMemberStock(stat.member.uid);
+          @let me = authService.currentMember();
+          @if (stock.length > 0) {
+            <div class="stock-list">
+              @for (item of stock; track item.chocolateName) {
+                <div class="stock-pill">
+                  <app-chocolate-icon [name]="item.chocolateName" [size]="18" />
+                  <span>{{ item.quantity }}× {{ item.chocolateName }}</span>
+                  @if (me && me.uid === stat.member.uid) {
+                    <button
+                      type="button"
+                      class="stock-action eat"
+                      (click)="markEaten(item.chocolateName)"
+                    >
+                      Mangé -1
+                    </button>
+                  } @else if (me && me.uid !== stat.member.uid) {
+                    <button
+                      type="button"
+                      class="stock-action trade"
+                      (click)="proposeTargetedTrade(stat.member.uid, item.chocolateName)"
+                    >
+                      Échanger
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="none-yet">Aucun chocolat en stock pour le moment.</p>
+          }
+        </div>
+      </ion-card-content>
+    </ion-card>
+  }
+
+  @if (primarySupervisor(); as sup) {
+    <ion-card class="surplus-card">
+      <ion-card-header>
+        <div class="member-row">
+          <div class="member-title">
+            <span class="member-avatar" [style.background]="sup.color">{{ sup.emoji }}</span>
+            <div>
+              <ion-card-title>Surplus de {{ sup.name }}</ion-card-title>
+              <span class="member-sub">Stock hors calendrier disponible à l'échange</span>
+            </div>
+          </div>
+          <ion-badge color="tertiary">Réserve</ion-badge>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        @let surplus = inventoryService.supervisorSurplus();
+        @let me = authService.currentMember();
+        @if (surplus.length > 0) {
+          <div class="stock-list">
+            @for (item of surplus; track item.chocolateName) {
+              <div class="stock-pill">
+                <app-chocolate-icon [name]="item.chocolateName" [size]="18" />
+                <span>{{ item.quantity }}× {{ item.chocolateName }}</span>
+                @if (me && me.uid !== sup.uid) {
+                  <button
+                    type="button"
+                    class="stock-action trade"
+                    (click)="proposeTargetedTrade(sup.uid, item.chocolateName)"
+                  >
+                    Échanger
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="none-yet">Aucun surplus renseigné (ajoute `totalCount` dans `chocolates`).</p>
+        }
+      </ion-card-content>
+    </ion-card>
+  }
+  </div>
+
+  <ion-toast
+    [isOpen]="toastMessage() !== ''"
+    [message]="toastMessage()"
+    [duration]="2200"
+    position="top"
+    (didDismiss)="toastMessage.set('')"
+  ></ion-toast>
+</ion-content>

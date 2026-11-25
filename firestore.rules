@@ -1,0 +1,180 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    match /members/{memberUid} {
+      allow read: if isSignedIn();
+      allow update: if isSignedIn()
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['pin', 'pinHash', 'hasDefaultPin', 'emoji', 'color', 'slug']);
+      allow create, delete: if false;
+    }
+
+    match /claims/{claimId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.keys().hasAll(['memberUid', 'memberName', 'dayNumber', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['memberUid', 'memberName', 'dayNumber', 'createdAt'])
+        && request.resource.data.memberUid is string
+        && request.resource.data.memberName is string
+        && request.resource.data.dayNumber is int
+        && request.resource.data.dayNumber >= 1
+        && request.resource.data.dayNumber <= 24
+        && request.resource.data.createdAt is int
+        && request.resource.data.createdAt <= request.time.toMillis() + 60000;
+      allow delete: if isSignedIn()
+        && request.time.toMillis() - resource.data.createdAt <= 35000;
+      allow update: if false;
+    }
+
+    match /trades/{tradeId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.keys().hasAll([
+          'authorUid',
+          'authorName',
+          'offeredChocolate',
+          'requestedChocolate',
+          'message',
+          'status',
+          'createdAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'authorUid',
+          'authorName',
+          'targetUid',
+          'targetName',
+          'offeredChocolate',
+          'requestedChocolate',
+          'message',
+          'status',
+          'createdAt'
+        ])
+        && request.resource.data.authorUid is string
+        && request.resource.data.authorName is string
+        && request.resource.data.offeredChocolate is string
+        && request.resource.data.offeredChocolate.size() <= 80
+        && request.resource.data.requestedChocolate is string
+        && request.resource.data.requestedChocolate.size() <= 80
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 240
+        && request.resource.data.createdAt is int
+        && request.resource.data.status == 'open';
+      allow update: if isSignedIn()
+        && resource.data.status == 'open'
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'acceptedByUid', 'acceptedByName', 'acceptedAt'])
+        && request.resource.data.status in ['accepted', 'cancelled'];
+      allow delete: if false;
+    }
+
+    match /consumptions/{consumptionId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.keys().hasAll([
+          'memberUid',
+          'chocolateName',
+          'quantity',
+          'createdAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'memberUid',
+          'chocolateName',
+          'quantity',
+          'createdAt'
+        ])
+        && request.resource.data.memberUid is string
+        && request.resource.data.chocolateName is string
+        && request.resource.data.chocolateName.size() <= 80
+        && request.resource.data.quantity is int
+        && request.resource.data.quantity >= 1
+        && request.resource.data.quantity <= 20
+        && request.resource.data.createdAt is int;
+      allow update: if false;
+      allow delete: if isSignedIn();
+    }
+
+    match /push_subscriptions/{subId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.keys().hasAll([
+          'memberUid',
+          'memberName',
+          'endpoint',
+          'keys',
+          'updatedAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'memberUid',
+          'memberName',
+          'endpoint',
+          'keys',
+          'reminderTime',
+          'timezone',
+          'lastReminderDate',
+          'updatedAt'
+        ])
+        && request.resource.data.memberUid is string
+        && request.resource.data.endpoint is string
+        && request.resource.data.endpoint.matches('^https://.*');
+      allow update: if isSignedIn()
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'memberUid',
+            'memberName',
+            'endpoint',
+            'keys',
+            'reminderTime',
+            'timezone',
+            'lastReminderDate',
+            'updatedAt'
+          ]);
+      allow delete: if isSignedIn();
+    }
+
+    match /chocolates/{chocoId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn()
+        && request.resource.data.keys().hasAll(['name', 'totalCount'])
+        && request.resource.data.keys().hasOnly(['name', 'totalCount', 'emoji'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1
+        && request.resource.data.name.size() <= 80
+        && request.resource.data.totalCount is int
+        && request.resource.data.totalCount >= 0
+        && request.resource.data.totalCount <= 1000;
+      allow delete: if isSignedIn();
+    }
+
+    match /calendar_days/{dayId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn()
+        && request.resource.data.keys().hasAll([
+          'dayNumber',
+          'chocolateName',
+          'quantityPerPerson',
+          'updatedAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'dayNumber',
+          'chocolateName',
+          'quantityPerPerson',
+          'updatedAt'
+        ])
+        && request.resource.data.dayNumber is int
+        && request.resource.data.dayNumber >= 1
+        && request.resource.data.dayNumber <= 24
+        && request.resource.data.chocolateName is string
+        && request.resource.data.chocolateName.size() >= 1
+        && request.resource.data.chocolateName.size() <= 80
+        && request.resource.data.quantityPerPerson is int
+        && request.resource.data.quantityPerPerson >= 1
+        && request.resource.data.quantityPerPerson <= 20
+        && request.resource.data.updatedAt is int;
+      allow delete: if isSignedIn();
+    }
+  }
+}

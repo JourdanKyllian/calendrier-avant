@@ -1,0 +1,289 @@
+.brand-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-content {
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+}
+
+.pin-alert-card {
+  margin: 0 0 8px;
+  --background: #fff4df;
+  border: 1px solid rgba(198, 139, 44, 0.35);
+}
+
+.pin-alert-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.pin-alert-inner p {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: #5b463c;
+}
+
+.summary-strip {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.supervisor-top-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: stretch;
+}
+
+.supervisor-top-grid .manage-days-btn {
+  grid-column: 1 / -1;
+  margin: 0;
+  height: 40px;
+}
+
+@media (min-width: 600px), (horizontal-viewport-segments: 2) {
+  .supervisor-top-grid {
+    grid-template-columns: 1fr 1fr auto;
+  }
+
+  .supervisor-top-grid .manage-days-btn {
+    grid-column: auto;
+    height: 100%;
+    --padding-start: 14px;
+    --padding-end: 14px;
+  }
+}
+
+.summary-pill {
+  background: #ffffff;
+  border-radius: 13px;
+  padding: 8px 12px;
+  border: 1px solid rgba(44, 24, 16, 0.08);
+  box-shadow: 0 3px 8px rgba(44, 24, 16, 0.04);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.summary-pill.has-recover {
+  background: #eef9f2;
+  border-color: rgba(31, 122, 76, 0.35);
+}
+
+.summary-pill .label {
+  font-size: 0.76rem;
+  color: #6f5b52;
+}
+
+.summary-pill strong {
+  font-size: 1.02rem;
+  color: #2c1810;
+}
+
+.summary-pill.has-recover strong {
+  color: #165e3a;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 8px;
+  font-size: 0.74rem;
+  color: #5b463c;
+  font-weight: 600;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.dot.red {
+  background: #b8332a;
+}
+
+.dot.green {
+  background: #1f7a4c;
+}
+
+.dot.upcoming {
+  background: #f5f2ee;
+  border: 1px solid rgba(44, 24, 16, 0.25);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+@media (min-width: 640px) {
+  .calendar-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.day-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(44, 24, 16, 0.14);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 6px 6px 5px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 64px;
+  box-shadow: 0 3px 8px rgba(44, 24, 16, 0.06);
+  color: #2c1810;
+}
+
+.day-bg-svg {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 42px;
+  height: 42px;
+  pointer-events: none;
+  z-index: 0;
+  color: currentColor;
+  opacity: 0.17;
+}
+
+.day-card.status-upcoming .day-bg-svg {
+  opacity: 0.14;
+}
+
+.day-card.status-taken {
+  background: #b8332a;
+  color: #ffffff;
+  border-color: #96251d;
+}
+
+.day-card.status-available {
+  background: #1f7a4c;
+  color: #ffffff;
+  border-color: #165e3a;
+}
+
+.day-card.status-upcoming {
+  background: #f5f2ee;
+  color: #8c817a;
+  border-color: rgba(44, 24, 16, 0.14);
+  opacity: 0.85;
+}
+
+.day-card-top,
+.claim-btn,
+.day-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.day-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.day-number {
+  font-size: 0.96rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.day-count {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.day-card.status-upcoming .day-count {
+  background: rgba(44, 24, 16, 0.08);
+}
+
+.claim-btn {
+  width: 100%;
+  border: none;
+  border-radius: 7px;
+  padding: 3px 4px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.95);
+  color: #165e3a;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.claim-btn:active {
+  transform: scale(0.97);
+}
+
+.day-footer {
+  font-size: 0.66rem;
+  font-weight: 700;
+  opacity: 0.95;
+}
+
+.manage-days-btn {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  font-size: 0.75rem;
+}
+
+.config-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  flex-shrink: 0;
+}
+
+.config-dot.filled {
+  background: #22c55e;
+}
+
+.config-dot.missing {
+  background: #ef4444;
+}
+
+.day-choco-label {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.94;
+}

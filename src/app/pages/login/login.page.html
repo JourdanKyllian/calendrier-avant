@@ -1,0 +1,86 @@
+<ion-content class="login-content" [scrollY]="false">
+  <div class="login-wrapper">
+    <div class="hero">
+      <div class="hero-badge" aria-hidden="true">
+        <app-santa-hat-logo [size]="44" />
+      </div>
+      <h1>ChocoAvent</h1>
+      <p>Partage équitable du calendrier de l'Avent avant Noël</p>
+    </div>
+
+    <ion-card class="login-card">
+      <ion-card-content>
+        <form (ngSubmit)="onSubmit()">
+          <ion-item lines="outline" class="field-item">
+            <ion-icon name="person-outline" slot="start" color="primary"></ion-icon>
+            <ion-input
+              label="Ton prénom"
+              labelPlacement="stacked"
+              placeholder="Ex. Kyllian"
+              name="name"
+              autocomplete="username"
+              [(ngModel)]="name"
+              required
+            ></ion-input>
+          </ion-item>
+
+          <ion-item lines="outline" class="field-item">
+            <ion-icon name="lock-closed-outline" slot="start" color="primary"></ion-icon>
+            <ion-input
+              label="Code PIN (4 chiffres)"
+              labelPlacement="stacked"
+              [type]="showPin() ? 'text' : 'password'"
+              inputmode="numeric"
+              maxlength="4"
+              placeholder="0000"
+              name="pin"
+              autocomplete="current-password"
+              [(ngModel)]="pin"
+              required
+            ></ion-input>
+            <ion-button
+              fill="clear"
+              slot="end"
+              type="button"
+              aria-label="Afficher ou masquer le code PIN"
+              (click)="togglePinVisibility()"
+            >
+              <ion-icon [name]="showPin() ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </ion-button>
+          </ion-item>
+
+          <p class="pin-hint">
+            Code PIN initial par défaut : <strong>0000</strong> (modifiable après connexion).
+          </p>
+
+          @if (errorMessage()) {
+            <ion-text color="danger">
+              <p class="error-box">{{ errorMessage() }}</p>
+            </ion-text>
+          }
+
+          <ion-button
+            expand="block"
+            type="submit"
+            [disabled]="loading()"
+            class="submit-btn"
+          >
+            @if (loading()) {
+              <ion-spinner name="crescent"></ion-spinner>
+            } @else {
+              Entrer dans le calendrier
+            }
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    @if (!authService.firebaseConfigured()) {
+      <div class="demo-note">
+        <strong>Firebase à connecter</strong> : renseigne tes clés dans
+        <code>src/environments/environment.ts</code> et
+        <code>src/environments/environment.prod.ts</code>.
+      </div>
+    }
+  </div>
+</ion-content>

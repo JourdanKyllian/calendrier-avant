@@ -1,0 +1,11 @@
+name = "chocoavent-push-worker"
+main = "src/index.ts"
+compatibility_date = "2025-02-14"
+
+[vars]
+FIREBASE_PROJECT_ID = "REPLACE_WITH_PROJECT_ID"
+FIREBASE_API_KEY = "REPLACE_WITH_FIREBASE_API_KEY"
+VAPID_SUBJECT = "mailto:admin@example.com"
+
+[triggers]
+crons = ["*/5 * * * *"]

@@ -1,0 +1,303 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Échanges &amp; Journal</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card class="trades-card">
+    <ion-card-header class="trades-card-header">
+      <div class="trades-title-row">
+        <ion-card-title class="trades-title">
+          <ion-icon name="swap-horizontal-outline"></ion-icon>
+          Échanges
+        </ion-card-title>
+        @if (visibleTrades().length > 0 && !tradeComposerOpen()) {
+          <ion-button size="small" (click)="openTradeComposer()">
+            Proposer un échange
+          </ion-button>
+        }
+      </div>
+    </ion-card-header>
+
+    <ion-card-content>
+      @if (tradeComposerOpen()) {
+        <div class="trade-composer">
+          <p class="composer-label">À qui proposer :</p>
+          <div class="kinder-chips">
+            <button
+              type="button"
+              class="kinder-pill"
+              [class.selected]="targetMemberUid === ''"
+              (click)="targetMemberUid = ''"
+            >
+              Tout le monde
+            </button>
+            @for (m of otherMembers(); track m.uid) {
+              <button
+                type="button"
+                class="kinder-pill"
+                [class.selected]="targetMemberUid === m.uid"
+                (click)="targetMemberUid = m.uid"
+              >
+                {{ m.emoji }} {{ m.name }}{{ m.isSupervisor ? ' (Surplus)' : '' }}
+              </button>
+            }
+          </div>
+
+          <p class="composer-label">Je propose mon chocolat :</p>
+          <div class="kinder-chips">
+            @for (item of chocolateOptions(); track item) {
+              <button
+                type="button"
+                class="kinder-pill"
+                [class.selected]="offeredChoice === item"
+                (click)="offeredChoice = item"
+              >
+                <app-chocolate-icon [name]="item" [size]="16" />
+                <span>{{ item }}</span>
+              </button>
+            }
+            <button
+              type="button"
+              class="kinder-pill"
+              [class.selected]="offeredChoice === '__custom__'"
+              (click)="offeredChoice = '__custom__'"
+            >
+              Autre...
+            </button>
+          </div>
+          @if (offeredChoice === '__custom__') {
+            <ion-input
+              class="custom-kinder-input"
+              fill="outline"
+              placeholder="Nom du chocolat proposé"
+              [(ngModel)]="customOffered"
+            ></ion-input>
+          }
+
+          <p class="composer-label">Contre (optionnel) :</p>
+          <div class="kinder-chips">
+            <button
+              type="button"
+              class="kinder-pill"
+              [class.selected]="requestedChoice === 'Peu importe'"
+              (click)="requestedChoice = 'Peu importe'"
+            >
+              Peu importe
+            </button>
+            @for (item of chocolateOptions(); track item) {
+              <button
+                type="button"
+                class="kinder-pill"
+                [class.selected]="requestedChoice === item"
+                (click)="requestedChoice = item"
+              >
+                <app-chocolate-icon [name]="item" [size]="16" />
+                <span>{{ item }}</span>
+              </button>
+            }
+            <button
+              type="button"
+              class="kinder-pill"
+              [class.selected]="requestedChoice === '__custom__'"
+              (click)="requestedChoice = '__custom__'"
+            >
+              Autre...
+            </button>
+          </div>
+          @if (requestedChoice === '__custom__') {
+            <ion-input
+              class="custom-kinder-input"
+              fill="outline"
+              placeholder="Chocolat souhaité"
+              [(ngModel)]="customRequested"
+            ></ion-input>
+          }
+
+          <p class="trade-preview">« {{ tradePreview() }} »</p>
+
+          <div class="composer-actions">
+            <ion-button
+              size="small"
+              fill="outline"
+              color="medium"
+              (click)="tradeComposerOpen.set(false)"
+            >
+              Annuler
+            </ion-button>
+            <ion-button size="small" [disabled]="tradeBusy()" (click)="submitTrade()">
+              Publier l'annonce
+            </ion-button>
+          </div>
+        </div>
+      } @else if (visibleTrades().length === 0) {
+        <div class="empty-trades-row">
+          <span class="empty-trades-text">Aucun échange proposé pour le moment.</span>
+          <ion-button size="small" (click)="openTradeComposer()">
+            Proposer un échange
+          </ion-button>
+        </div>
+      }
+
+      @if (visibleTrades().length > 0) {
+        <div class="trades-list">
+          @for (trade of visibleTrades(); track trade.id) {
+            <div class="trade-row" [class.accepted]="trade.status === 'accepted'">
+              <div class="trade-info">
+                <app-chocolate-icon [name]="trade.offeredChocolate" [size]="24" />
+                <div>
+                  <p class="trade-msg">{{ trade.message }}</p>
+                  <span class="trade-meta">
+                    {{ trade.createdAt | date: 'dd/MM à HH:mm' }}
+                    @if (trade.status === 'accepted') {
+                      • Accepté par <strong>{{ trade.acceptedByName }}</strong>
+                    }
+                  </span>
+                </div>
+              </div>
+
+              @if (trade.status === 'open') {
+                @let me = authService.currentMember();
+                @if (me && trade.authorUid !== me.uid && (!trade.targetUid || trade.targetUid === me.uid)) {
+                  <ion-button size="small" color="secondary" (click)="acceptTrade(trade)">
+                    Accepter
+                  </ion-button>
+                } @else if (me && trade.authorUid === me.uid) {
+                  <ion-button size="small" fill="outline" color="medium" (click)="cancelTrade(trade)">
+                    Annuler
+                  </ion-button>
+                }
+              } @else {
+                <ion-badge color="success">Échangé</ion-badge>
+              }
+            </div>
+          }
+        </div>
+      }
+    </ion-card-content>
+  </ion-card>
+
+  <h3 class="section-subtitle">Historique</h3>
+
+  <div class="history-layout" [class.split-member]="selectedMemberStats() !== null">
+    <div class="history-left">
+      <div class="filters">
+        <ion-chip
+          [outline]="filterMemberUid() !== 'all'"
+          color="primary"
+          (click)="filterMemberUid.set('all')"
+        >
+          <ion-label>Tous</ion-label>
+        </ion-chip>
+
+        @for (member of calendarService.participants(); track member.uid) {
+          <ion-chip
+            [outline]="filterMemberUid() !== member.uid"
+            color="primary"
+            (click)="filterMemberUid.set(member.uid)"
+          >
+            <ion-label>{{ member.emoji }} {{ member.name }}</ion-label>
+          </ion-chip>
+        }
+      </div>
+
+      @if (selectedMemberStats(); as memberStats) {
+        <ion-card class="member-overview-card">
+          <ion-card-header>
+            <div class="member-head">
+              <div class="member-title">
+                <span class="member-avatar" [style.background]="memberStats.member.color">
+                  {{ memberStats.member.emoji }}
+                </span>
+                <div>
+                  <ion-card-title>{{ memberStats.member.name }}</ion-card-title>
+                  <span class="member-sub">
+                    {{ memberStats.daysTakenCount }} / {{ memberStats.unlockedDaysCount }} prises
+                    (sur 24)
+                  </span>
+                </div>
+              </div>
+              <ion-badge [color]="memberStats.daysToRecoverCount > 0 ? 'secondary' : 'success'">
+                @if (memberStats.daysToRecoverCount > 0) {
+                  {{ memberStats.daysToRecoverCount }} à récupérer
+                } @else {
+                  À jour
+                }
+              </ion-badge>
+            </div>
+          </ion-card-header>
+
+          <ion-card-content>
+            <div class="mini-cal-header">
+              <strong>Calendrier de {{ memberStats.member.name }}</strong>
+              <div class="legend">
+                <span class="legend-item"><i class="dot red"></i> Prise</span>
+                <span class="legend-item"><i class="dot green"></i> À prendre</span>
+                <span class="legend-item"><i class="dot upcoming"></i> À venir</span>
+              </div>
+            </div>
+
+            <div class="mini-calendar-grid">
+              @for (num of calendarNumbers; track num) {
+                @let status = dayStatusForSelectedMember(num);
+                <div
+                  class="mini-day-box"
+                  [class.taken-red]="status === 'taken'"
+                  [class.available-green]="status === 'available'"
+                  [class.upcoming-gray]="status === 'upcoming'"
+                >
+                  {{ num }}
+                </div>
+              }
+            </div>
+          </ion-card-content>
+        </ion-card>
+      }
+    </div>
+
+    <div class="history-right">
+      @if (selectedMemberStats(); as memberStats) {
+        <h3 class="section-subtitle">Historique de {{ memberStats.member.name }}</h3>
+      }
+
+      @if (filteredClaims().length > 0) {
+        <ion-list inset="true" class="history-list">
+          @for (claim of filteredClaims(); track claim.id) {
+            <ion-item>
+              <span slot="start" class="take-emoji">{{ getMemberEmoji(claim.memberUid) }}</span>
+              <ion-label>
+                <h3>
+                  <strong>{{ claim.memberName }}</strong> a pris la case
+                  <strong>{{ claim.dayNumber }} décembre</strong>
+                </h3>
+                <p>{{ claim.createdAt | date: 'dd/MM à HH:mm' }}</p>
+              </ion-label>
+              @if (canDelete(claim)) {
+                <ion-button
+                  fill="clear"
+                  color="danger"
+                  slot="end"
+                  (click)="deleteClaim(claim)"
+                  aria-label="Annuler cette prise"
+                >
+                  <ion-icon name="trash-outline"></ion-icon>
+                </ion-button>
+              }
+            </ion-item>
+          }
+        </ion-list>
+      } @else {
+        <p class="empty-history">Aucune prise enregistrée pour cette sélection.</p>
+      }
+    </div>
+  </div>
+
+  <ion-toast
+    [isOpen]="toastMessage() !== ''"
+    [message]="toastMessage()"
+    [duration]="2400"
+    position="top"
+    (didDismiss)="toastMessage.set('')"
+  ></ion-toast>
+</ion-content>

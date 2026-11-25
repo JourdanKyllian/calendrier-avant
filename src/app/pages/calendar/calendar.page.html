@@ -1,0 +1,290 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      <span class="brand-title">
+        <app-santa-hat-logo [size]="22" />
+        <span>ChocoAvent</span>
+      </span>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="calendar-content">
+  @if (authService.currentMember(); as me) {
+    @if (me.hasDefaultPin) {
+      <ion-card class="pin-alert-card">
+        <ion-card-content class="pin-alert-inner">
+          <div>
+            <strong>PIN par défaut (0000)</strong>
+            <p>Personnalise ton code PIN à 4 chiffres sans te déconnecter.</p>
+          </div>
+          <ion-button size="small" routerLink="/tabs/profile">
+            <ion-icon name="key-outline" slot="start"></ion-icon>
+            Changer
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    @if (me.isSupervisor) {
+      <div class="supervisor-top-grid">
+        <div class="summary-pill">
+          <span class="label">Mode superviseur</span>
+          <strong>Lecture seule</strong>
+        </div>
+        <div class="summary-pill">
+          <span class="label">Cases débloquées</span>
+          <strong>{{ calendarService.unlockedDaysCount() }} / 24</strong>
+        </div>
+        <ion-button
+          expand="block"
+          color="primary"
+          class="manage-days-btn"
+          (click)="adminModalOpen.set(true)"
+        >
+          <ion-icon name="create-outline" slot="start"></ion-icon>
+          Gérer les cases ({{ configService.configuredCount() }}/24)
+        </ion-button>
+      </div>
+
+      <div class="legend-row">
+        <span class="legend-item"><i class="dot red"></i> Tous pris</span>
+        <span class="legend-item"><i class="dot green"></i> En cours</span>
+        <span class="legend-item"><i class="dot upcoming"></i> À venir</span>
+      </div>
+    } @else if (currentMemberStats(); as myStats) {
+      <div class="summary-strip">
+        <div class="summary-pill">
+          <span class="label">Tes cases</span>
+          <strong>{{ myStats.daysTakenCount }} / {{ calendarService.unlockedDaysCount() }}</strong>
+        </div>
+        <div class="summary-pill" [class.has-recover]="myStats.daysToRecoverCount > 0">
+          <span class="label">À récupérer</span>
+          <strong>
+            @if (myStats.daysToRecoverCount > 0) {
+              {{ myStats.daysToRecoverCount }} case{{ myStats.daysToRecoverCount > 1 ? 's' : '' }}
+            } @else {
+              À jour
+            }
+          </strong>
+        </div>
+      </div>
+
+      <div class="legend-row">
+        <span class="legend-item"><i class="dot red"></i> Prise</span>
+        <span class="legend-item"><i class="dot green"></i> À prendre</span>
+        <span class="legend-item"><i class="dot upcoming"></i> À venir</span>
+      </div>
+    }
+
+    <div class="calendar-grid">
+      @for (dayNum of dayNumbers; track dayNum) {
+        @let status = dayStatus(dayNum);
+        @let motif = getDayMotif(dayNum);
+        @let dayConfig = configService.getDayConfig(dayNum);
+        <div
+          class="day-card"
+          [class.status-taken]="status === 'taken'"
+          [class.status-available]="status === 'available'"
+          [class.status-upcoming]="status === 'upcoming'"
+        >
+          <svg class="day-bg-svg" viewBox="0 0 64 64" aria-hidden="true">
+            @switch (motif) {
+              @case ('tree') {
+                <polygon
+                  fill="currentColor"
+                  points="32,4 34.4,9.2 40,9.8 35.8,13.6 37,19.2 32,16.2 27,19.2 28.2,13.6 24,9.8 29.6,9.2"
+                />
+                <path
+                  fill="currentColor"
+                  d="M32 16L18 32h7L14 45h8L11 56h42L42 45h8L39 32h7L32 16z"
+                />
+                <rect fill="currentColor" x="28" y="56" width="8" height="6" rx="1" />
+              }
+              @case ('star') {
+                <polygon
+                  fill="currentColor"
+                  points="32,6 39.2,22.2 56.8,24.1 43.6,35.9 47.3,53.2 32,44.2 16.7,53.2 20.4,35.9 7.2,24.1 24.8,22.2"
+                />
+              }
+              @case ('snowflake') {
+                <g stroke="currentColor" stroke-width="3.2" stroke-linecap="round" fill="none">
+                  <line x1="32" y1="7" x2="32" y2="57" />
+                  <line x1="10.3" y1="19.5" x2="53.7" y2="44.5" />
+                  <line x1="53.7" y1="19.5" x2="10.3" y2="44.5" />
+                  <polyline points="26,13 32,19 38,13" />
+                  <polyline points="26,51 32,45 38,51" />
+                  <polyline points="13,26 20,25 18,18" />
+                  <polyline points="51,38 44,39 46,46" />
+                  <polyline points="46,18 44,25 51,26" />
+                  <polyline points="18,46 20,39 13,38" />
+                </g>
+              }
+              @case ('snowball') {
+                <circle cx="32" cy="29" r="20" fill="none" stroke="currentColor" stroke-width="3.2" />
+                <path
+                  fill="currentColor"
+                  d="M15 39c5-3 11-2 17 0s12 2 17-1a20 20 0 0 1-34 1z"
+                />
+                <circle fill="currentColor" cx="24" cy="22" r="2.2" />
+                <circle fill="currentColor" cx="34" cy="18" r="2.6" />
+                <circle fill="currentColor" cx="41" cy="27" r="2" />
+                <circle fill="currentColor" cx="27" cy="30" r="1.8" />
+                <path fill="currentColor" d="M18 50h28l3 8H15l3-8z" />
+              }
+              @case ('snowman') {
+                <circle cx="30" cy="18" r="8" fill="currentColor" />
+                <polygon fill="currentColor" points="37,17 47,19 37,20.5" />
+                <rect fill="currentColor" x="21" y="25" width="18" height="3.8" rx="1.9" />
+                <path fill="currentColor" d="M34 27.5l5 8-3.8 1.8-4.5-7.8z" />
+                <circle cx="30" cy="42" r="13.5" fill="currentColor" />
+                <g stroke="currentColor" stroke-width="2.6" stroke-linecap="round" fill="none">
+                  <line x1="19" y1="34" x2="8" y2="25" />
+                  <line x1="12" y1="28.3" x2="10" y2="22.5" />
+                  <line x1="41" y1="34" x2="52" y2="25" />
+                  <line x1="48" y1="28.3" x2="50" y2="22.5" />
+                </g>
+              }
+              @case ('santa') {
+                <path fill="currentColor" d="M18 22C20 11 29 6 39 9l8 6-4 3c-4-2-9-2-12 4H18z" />
+                <circle cx="49" cy="16" r="4.2" fill="currentColor" />
+                <rect fill="currentColor" x="16" y="21" width="30" height="5.2" rx="2.6" />
+                <circle cx="31" cy="31" r="2.8" fill="currentColor" />
+                <path
+                  fill="currentColor"
+                  d="M16 28c0 17 6.5 29 15 29s15-12 15-29c-4.2 3.2-9 4.5-15 4.5S20.2 31.2 16 28z"
+                />
+              }
+              @case ('reindeer') {
+                <g stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                  <path d="M25 24C22 17 18 12 13 8" />
+                  <path d="M20 16l-6 1" />
+                  <path d="M23 19l3-6" />
+                  <path d="M39 24C42 17 46 12 51 8" />
+                  <path d="M44 16l6 1" />
+                  <path d="M41 19l-3-6" />
+                </g>
+                <ellipse cx="17" cy="27" rx="5.5" ry="3" transform="rotate(-20 17 27)" fill="currentColor" />
+                <ellipse cx="47" cy="27" rx="5.5" ry="3" transform="rotate(20 47 27)" fill="currentColor" />
+                <path
+                  fill="currentColor"
+                  d="M21 24h22c2 0 4 5 3 11l-3 12c-1 5-5 8-11 8s-10-3-11-8l-3-12c-1-6 1-11 3-11z"
+                />
+                <circle cx="32" cy="52" r="5" fill="currentColor" />
+              }
+              @case ('sleigh') {
+                <path
+                  fill="currentColor"
+                  d="M10 18c4 0 7 4 9 11h17c4 0 7-4 10-7 2-2 6-1 6 3 0 6-6 14-14 15H16c-5 0-8-4-8-10 0-6 0-12 2-12z"
+                />
+                <g stroke="currentColor" stroke-width="3.2" stroke-linecap="round" fill="none">
+                  <line x1="18" y1="40" x2="18" y2="50" />
+                  <line x1="40" y1="40" x2="40" y2="50" />
+                  <path d="M8 50h38c5 0 9-3 9-7" />
+                </g>
+              }
+              @case ('sack') {
+                <path fill="currentColor" d="M22 10h20l-4 9H26l-4-9z" />
+                <rect fill="currentColor" x="21" y="19" width="22" height="4.2" rx="2" />
+                <path
+                  fill="currentColor"
+                  d="M22 24h20c8 5 11 19 6 27-4 5-10 7-16 7s-12-2-16-7c-5-8-2-22 6-27z"
+                />
+              }
+              @case ('gift') {
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linejoin="round"
+                  d="M32 19c-5-9-15-9-13-2 1 3 7 3 13 2zm0 0c5-9 15-9 13-2-1 3-7 3-13 2z"
+                />
+                <rect fill="currentColor" x="12" y="21" width="17" height="8" rx="1.5" />
+                <rect fill="currentColor" x="35" y="21" width="17" height="8" rx="1.5" />
+                <rect fill="currentColor" x="15" y="32" width="14" height="10" rx="1.5" />
+                <rect fill="currentColor" x="35" y="32" width="14" height="10" rx="1.5" />
+                <rect fill="currentColor" x="15" y="45" width="14" height="11" rx="1.5" />
+                <rect fill="currentColor" x="35" y="45" width="14" height="11" rx="1.5" />
+              }
+              @case ('yulelog') {
+                <path
+                  fill="currentColor"
+                  d="M18 24h26c-7 0-12 6-12 14s5 14 12 14H18c-7 0-12-6-12-14s5-14 12-14z"
+                />
+                <circle cx="45" cy="38" r="12.5" fill="none" stroke="currentColor" stroke-width="3" />
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.6"
+                  stroke-linecap="round"
+                  d="M45 38c2 0 3-2 2-4-2-3-6-2-7 1-2 5 2 9 7 9 5 0 8-5 7-10"
+                />
+                <path fill="currentColor" d="M23 22c-3-6 2-11 8-8-1 5-4 8-8 8z" />
+                <path fill="currentColor" d="M31 22c2-6 8-7 10-2-3 3-7 3-10 2z" />
+              }
+            }
+          </svg>
+
+          <div class="day-card-top">
+            <span class="day-number">{{ dayNum }}</span>
+            @if (me.isSupervisor) {
+              <span
+                class="config-dot"
+                [class.filled]="!!dayConfig"
+                [class.missing]="!dayConfig"
+                [attr.aria-label]="dayConfig ? 'Case configurée' : 'Case à remplir'"
+              ></span>
+            }
+          </div>
+
+          @if (dayConfig && (me.isSupervisor || status === 'taken')) {
+            <span class="day-choco-label">
+              <app-chocolate-icon [name]="dayConfig.chocolateName" [size]="14" />
+              <span>{{ dayConfig.quantityPerPerson }}× {{ dayConfig.chocolateName }}</span>
+            </span>
+          }
+
+          @if (me.isSupervisor) {
+            <div class="day-footer">
+              @if (status === 'upcoming') {
+                À venir
+              } @else {
+                {{ dayClaimsCount(dayNum) }}/{{ calendarService.participants().length }} pris
+              }
+            </div>
+          } @else if (status === 'available') {
+            <button
+              type="button"
+              class="claim-btn"
+              (click)="quickClaim(dayNum)"
+            >
+              Claim
+            </button>
+          } @else {
+            <div class="day-footer">
+              @if (status === 'taken') {
+                ✓ Prise
+              } @else {
+                À venir
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <ion-modal [isOpen]="adminModalOpen()" (didDismiss)="adminModalOpen.set(false)">
+    <ng-template>
+      <app-supervisor-days-modal (closed)="adminModalOpen.set(false)" />
+    </ng-template>
+  </ion-modal>
+
+  <ion-toast
+    [isOpen]="toastMessage() !== ''"
+    [message]="toastMessage()"
+    [duration]="2500"
+    position="top"
+    (didDismiss)="toastMessage.set('')"
+  ></ion-toast>
+</ion-content>

@@ -1,0 +1,71 @@
+.undo-toast-overlay {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 10px);
+  left: 12px;
+  right: 12px;
+  max-width: 460px;
+  margin: 0 auto;
+  z-index: 99999;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(34, 18, 12, 0.96);
+  backdrop-filter: blur(10px);
+  color: #fff8f0;
+  box-shadow: 0 12px 32px rgba(20, 10, 6, 0.42);
+  border: 1px solid rgba(255, 248, 240, 0.2);
+  animation: undoSlideDown 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes undoSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-120%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.undo-toast-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.undo-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.undo-emoji {
+  font-size: 1.45rem;
+  flex-shrink: 0;
+}
+
+.undo-info strong {
+  display: block;
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+.undo-info p {
+  margin: 2px 0 0;
+  font-size: 0.76rem;
+  color: rgba(255, 248, 240, 0.8);
+}
+
+.undo-bar-track {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.undo-bar-fill {
+  height: 100%;
+  background: #38c172;
+  transition: width 0.9s linear;
+}

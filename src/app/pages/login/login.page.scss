@@ -1,0 +1,95 @@
+.login-content {
+  --background: linear-gradient(165deg, #2c1810 0%, #5a231f 48%, #faf5ee 48.2%);
+}
+
+.login-wrapper {
+  height: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: max(18px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hero {
+  text-align: center;
+  color: #fff8f0;
+  margin-bottom: 18px;
+}
+
+.hero-badge {
+  width: 62px;
+  height: 62px;
+  border-radius: 18px;
+  background: rgba(255, 248, 240, 0.14);
+  border: 1px solid rgba(255, 248, 240, 0.28);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.hero p {
+  margin: 6px 0 0;
+  font-size: 0.94rem;
+  color: rgba(255, 248, 240, 0.85);
+}
+
+.login-card {
+  margin: 0;
+}
+
+.field-item {
+  margin-bottom: 14px;
+  --border-radius: 12px;
+  --padding-start: 10px;
+}
+
+.pin-hint {
+  margin: 4px 0 14px;
+  font-size: 0.83rem;
+  color: #6f5b52;
+  text-align: center;
+}
+
+.error-box {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(184, 51, 42, 0.1);
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.submit-btn {
+  height: 48px;
+  margin-top: 4px;
+}
+
+.demo-note {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fffdfb;
+  border: 1px dashed rgba(44, 24, 16, 0.22);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #4d3a31;
+}
+
+.demo-note code {
+  background: rgba(44, 24, 16, 0.08);
+  padding: 1px 5px;
+  border-radius: 5px;
+}

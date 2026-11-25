@@ -1,0 +1,248 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Mon compte</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  @if (authService.currentMember(); as me) {
+    <div class="profile-layout">
+    <ion-card class="profile-card">
+      <ion-card-content>
+        <div class="profile-header">
+          <div class="big-avatar" [style.background]="me.color">{{ me.emoji }}</div>
+          <div>
+            <h2>{{ me.name }}</h2>
+            <div class="badges">
+              @if (me.isSupervisor) {
+                <ion-badge color="tertiary">Superviseur</ion-badge>
+              }
+              <ion-badge [color]="me.hasDefaultPin ? 'warning' : 'success'">
+                {{ me.hasDefaultPin ? 'PIN par défaut (0000)' : 'PIN personnalisé' }}
+              </ion-badge>
+            </div>
+          </div>
+        </div>
+
+        <p class="picker-label">Icône</p>
+        <div class="picker-row">
+          @for (emoji of emojis; track emoji) {
+            <button
+              type="button"
+              class="emoji-btn"
+              [class.selected]="me.emoji === emoji"
+              (click)="selectEmoji(emoji)"
+            >
+              {{ emoji }}
+            </button>
+          }
+        </div>
+
+        <p class="picker-label">Couleur</p>
+        <div class="picker-row">
+          @for (color of colors; track color) {
+            <button
+              type="button"
+              class="color-btn"
+              [style.background]="color"
+              [class.selected]="me.color === color"
+              (click)="selectColor(color)"
+              [attr.aria-label]="'Choisir la couleur ' + color"
+            ></button>
+          }
+        </div>
+        @if (me.isSupervisor) {
+          <p class="picker-label">Surplus en stock (hors calendrier)</p>
+          @if (inventoryService.supervisorSurplus().length > 0) {
+            <div class="surplus-row">
+              @for (item of inventoryService.supervisorSurplus(); track item.chocolateName) {
+                <span class="surplus-pill">
+                  <app-chocolate-icon [name]="item.chocolateName" [size]="18" />
+                  <span>{{ item.quantity }}× {{ item.chocolateName }}</span>
+                </span>
+              }
+            </div>
+          } @else {
+            <p class="pin-desc">Aucun surplus calculé (ajoute `totalCount` dans `chocolates`).</p>
+          }
+        }
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="pin-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="key-outline"></ion-icon>
+          Changer mon code PIN
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="pin-desc">
+          Change ton code PIN à 4 chiffres sans te déconnecter de ton téléphone.
+        </p>
+
+        <form (ngSubmit)="onChangePin()">
+          <ion-item lines="outline" class="pin-field">
+            <ion-input
+              label="PIN actuel"
+              labelPlacement="stacked"
+              type="password"
+              inputmode="numeric"
+              maxlength="4"
+              placeholder="0000"
+              name="currentPin"
+              [(ngModel)]="currentPin"
+              required
+            ></ion-input>
+          </ion-item>
+
+          <ion-item lines="outline" class="pin-field">
+            <ion-input
+              label="Nouveau PIN (4 chiffres)"
+              labelPlacement="stacked"
+              type="password"
+              inputmode="numeric"
+              maxlength="4"
+              placeholder="Ex. 1942"
+              name="newPin"
+              [(ngModel)]="newPin"
+              required
+            ></ion-input>
+          </ion-item>
+
+          <ion-item lines="outline" class="pin-field">
+            <ion-input
+              label="Confirmer le nouveau PIN"
+              labelPlacement="stacked"
+              type="password"
+              inputmode="numeric"
+              maxlength="4"
+              placeholder="Ex. 1942"
+              name="confirmPin"
+              [(ngModel)]="confirmPin"
+              required
+            ></ion-input>
+          </ion-item>
+
+          <ion-button expand="block" type="submit" [disabled]="pinBusy()">
+            @if (pinBusy()) {
+              <ion-spinner name="crescent"></ion-spinner>
+            } @else {
+              Enregistrer le nouveau PIN
+            }
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="notif-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="notifications-outline"></ion-icon>
+          Notifications &amp; Rappel
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="pin-desc">
+          Reçois une alerte lors des échanges et un rappel quotidien pour ne pas oublier ton chocolat.
+        </p>
+
+        @if (pushService.needsHomeScreenInstall()) {
+          <p class="push-hint">
+            Sur iPhone, ajoute d'abord l'application via <strong>Partager → Sur l'écran d'accueil</strong> pour activer les notifications.
+          </p>
+        }
+
+        <div class="push-status-row">
+          <ion-badge [color]="pushService.isSubscribed() ? 'success' : 'medium'">
+            {{ pushService.isSubscribed() ? 'Notifications activées' : 'Notifications inactives' }}
+          </ion-badge>
+          @if (!pushService.isPushConfigured()) {
+            <ion-badge color="warning">Worker à connecter</ion-badge>
+          }
+        </div>
+
+        @if (!pushService.isSubscribed()) {
+          <ion-button
+            expand="block"
+            color="secondary"
+            [disabled]="pushBusy()"
+            (click)="onEnableNotifications()"
+          >
+            Activer les notifications
+          </ion-button>
+        } @else {
+          <ion-button
+            expand="block"
+            fill="outline"
+            color="medium"
+            [disabled]="pushBusy()"
+            (click)="onDisableNotifications()"
+          >
+            Désactiver sur cet appareil
+          </ion-button>
+        }
+
+        <ion-button
+          expand="block"
+          size="small"
+          fill="outline"
+          color="primary"
+          class="test-push-btn"
+          [disabled]="pushBusy()"
+          (click)="onTestNotification()"
+        >
+          Tester la notification
+        </ion-button>
+
+        <div class="reminder-row">
+          <div class="reminder-toggle-row">
+            <div>
+              <span class="reminder-label">Rappel quotidien chocolat</span>
+              <span class="reminder-sub">
+                {{ reminderEnabled() ? 'Actif' : 'Désactivé' }}
+              </span>
+            </div>
+            <ion-toggle
+              [checked]="reminderEnabled()"
+              [disabled]="pushBusy()"
+              (ionChange)="onToggleReminder($event.detail.checked)"
+              aria-label="Activer ou désactiver le rappel quotidien"
+            ></ion-toggle>
+          </div>
+
+          @if (reminderEnabled()) {
+            <div class="reminder-controls">
+              <input
+                #timeInput
+                id="reminder-time"
+                type="time"
+                class="time-input"
+                [(ngModel)]="reminderTimeInput"
+                name="reminderTimeInput"
+                (click)="openTimePicker(timeInput)"
+              />
+              <ion-button size="small" [disabled]="pushBusy()" (click)="onSaveReminderTime()">
+                Enregistrer
+              </ion-button>
+            </div>
+          }
+        </div>
+      </ion-card-content>
+    </ion-card>
+    </div>
+
+    <ion-button expand="block" color="medium" fill="outline" (click)="onLogout()" class="logout-btn">
+      <ion-icon name="log-out-outline" slot="start"></ion-icon>
+      Se déconnecter
+    </ion-button>
+  }
+
+  <ion-toast
+    [isOpen]="toastMessage() !== ''"
+    [message]="toastMessage()"
+    [duration]="2600"
+    position="top"
+    (didDismiss)="toastMessage.set('')"
+  ></ion-toast>
+</ion-content>

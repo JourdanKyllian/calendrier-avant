@@ -1,0 +1,58 @@
+@if (calendarService.pendingUndo(); as undo) {
+  <div class="undo-toast-overlay" role="status" aria-live="polite">
+    <div class="undo-toast-body">
+      <div class="undo-info">
+        <span class="undo-emoji">🎄</span>
+        <div>
+          @if (undo.claims.length === 1) {
+            <strong>Case {{ undo.claims[0].dayNumber }} réclamée</strong>
+          } @else {
+            <strong>{{ undo.claims.length }} cases réclamées ({{ formatDays(undo.claims) }})</strong>
+          }
+          <p>Confirmé définitivement dans {{ undo.secondsLeft }}s</p>
+        </div>
+      </div>
+
+      <ion-button size="small" color="light" (click)="undoAllPending()">
+        <ion-icon name="arrow-undo-outline" slot="start"></ion-icon>
+        {{ undo.claims.length > 1 ? 'Tout annuler' : 'Annuler' }}
+      </ion-button>
+    </div>
+
+    <div class="undo-bar-track">
+      <div class="undo-bar-fill" [style.width.%]="undoProgressPercent()"></div>
+    </div>
+  </div>
+}
+
+<ion-tabs>
+  <ion-tab-bar slot="bottom">
+    <ion-tab-button tab="calendar" href="/tabs/calendar">
+      <ion-icon name="calendar-outline"></ion-icon>
+      <ion-label>Calendrier</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="stats" href="/tabs/stats">
+      <ion-icon name="bar-chart-outline"></ion-icon>
+      <ion-label>Suivi</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="history" href="/tabs/history">
+      <ion-icon name="time-outline"></ion-icon>
+      <ion-label>Journal</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="profile" href="/tabs/profile">
+      <ion-icon name="person-circle-outline"></ion-icon>
+      <ion-label>Compte</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+</ion-tabs>
+
+<ion-toast
+  [isOpen]="toastMessage() !== ''"
+  [message]="toastMessage()"
+  [duration]="2200"
+  position="top"
+  (didDismiss)="toastMessage.set('')"
+></ion-toast>
