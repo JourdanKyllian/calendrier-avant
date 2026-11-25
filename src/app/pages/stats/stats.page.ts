@@ -77,6 +77,16 @@ export class StatsPage {
     () => this.calendarService.members().find((m) => m.isSupervisor) ?? null
   );
 
+  readonly supervisorsLabel = computed(() => {
+    const names = this.calendarService
+      .members()
+      .filter((m) => m.isSupervisor)
+      .map((m) => m.name);
+    if (names.length === 0) return 'la supervision';
+    if (names.length === 1) return names[0];
+    return `${names.slice(0, -1).join(', ')} et ${names[names.length - 1]}`;
+  });
+
   readonly logAvailableStock = computed(() => {
     if (this.logSource() === 'surplus') {
       return this.inventoryService.supervisorSurplus();

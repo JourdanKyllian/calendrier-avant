@@ -293,8 +293,10 @@
                 <div class="member-title">
                   <span class="member-avatar" [style.background]="sup.color">{{ sup.emoji }}</span>
                   <div>
-                    <ion-card-title>Surplus de {{ sup.name }}</ion-card-title>
-                    <span class="member-sub">Stock hors calendrier disponible à l'échange</span>
+                    <ion-card-title>Surplus de stock</ion-card-title>
+                    <span class="member-sub">
+                      Chocolats hors calendrier, sous la supervision de {{ supervisorsLabel() }}
+                    </span>
                   </div>
                 </div>
                 <ion-badge color="tertiary">Réserve</ion-badge>
