@@ -23,99 +23,79 @@
     <ion-card-content>
       @if (tradeComposerOpen()) {
         <div class="trade-composer">
-          <p class="composer-label">À qui proposer :</p>
-          <div class="kinder-chips">
-            <button
-              type="button"
-              class="kinder-pill"
-              [class.selected]="targetMemberUid === ''"
-              (click)="targetMemberUid = ''"
-            >
-              Tout le monde
-            </button>
-            @for (m of otherMembers(); track m.uid) {
-              <button
-                type="button"
-                class="kinder-pill"
-                [class.selected]="targetMemberUid === m.uid"
-                (click)="targetMemberUid = m.uid"
-              >
-                {{ m.emoji }} {{ m.name }}{{ m.isSupervisor ? ' (Surplus)' : '' }}
-              </button>
-            }
-          </div>
-
-          <p class="composer-label">Je propose mon chocolat :</p>
-          <div class="kinder-chips">
-            @for (item of chocolateOptions(); track item) {
-              <button
-                type="button"
-                class="kinder-pill"
-                [class.selected]="offeredChoice === item"
-                (click)="offeredChoice = item"
-              >
-                <app-chocolate-icon [name]="item" [size]="16" />
-                <span>{{ item }}</span>
-              </button>
-            }
-            <button
-              type="button"
-              class="kinder-pill"
-              [class.selected]="offeredChoice === '__custom__'"
-              (click)="offeredChoice = '__custom__'"
-            >
-              Autre...
-            </button>
-          </div>
-          @if (offeredChoice === '__custom__') {
-            <ion-input
-              class="custom-kinder-input"
+          <div class="composer-dropdowns">
+            <ion-select
+              class="composer-select"
+              interface="popover"
+              label="À qui"
+              labelPlacement="stacked"
               fill="outline"
-              placeholder="Nom du chocolat proposé"
-              [(ngModel)]="customOffered"
-            ></ion-input>
-          }
+              [ngModel]="targetMemberUid()"
+              (ngModelChange)="onTargetChange($event)"
+            >
+              <ion-select-option value="">Tout le monde</ion-select-option>
+              @for (m of otherMembers(); track m.uid) {
+                <ion-select-option [value]="m.uid">
+                  {{ m.emoji }} {{ m.name }}{{ m.isSupervisor ? ' (Surplus)' : '' }}
+                </ion-select-option>
+              }
+            </ion-select>
 
-          <p class="composer-label">Contre (optionnel) :</p>
-          <div class="kinder-chips">
-            <button
-              type="button"
-              class="kinder-pill"
-              [class.selected]="requestedChoice === 'Peu importe'"
-              (click)="requestedChoice = 'Peu importe'"
-            >
-              Peu importe
-            </button>
-            @for (item of chocolateOptions(); track item) {
-              <button
-                type="button"
-                class="kinder-pill"
-                [class.selected]="requestedChoice === item"
-                (click)="requestedChoice = item"
-              >
-                <app-chocolate-icon [name]="item" [size]="16" />
-                <span>{{ item }}</span>
-              </button>
-            }
-            <button
-              type="button"
-              class="kinder-pill"
-              [class.selected]="requestedChoice === '__custom__'"
-              (click)="requestedChoice = '__custom__'"
-            >
-              Autre...
-            </button>
-          </div>
-          @if (requestedChoice === '__custom__') {
-            <ion-input
-              class="custom-kinder-input"
+            <ion-select
+              class="composer-select"
+              interface="popover"
+              label="J'offre (mon stock)"
+              labelPlacement="stacked"
               fill="outline"
-              placeholder="Chocolat souhaité"
-              [(ngModel)]="customRequested"
-            ></ion-input>
-          }
+              placeholder="Aucun"
+              [disabled]="myAvailableStock().length === 0"
+              [ngModel]="offeredChoice()"
+              (ngModelChange)="onOfferedChange($event)"
+            >
+              @for (item of myAvailableStock(); track item.chocolateName) {
+                <ion-select-option [value]="item.chocolateName">
+                  {{ item.chocolateName }} ({{ item.quantity }})
+                </ion-select-option>
+              }
+            </ion-select>
 
-          <p class="trade-preview">« {{ tradePreview() }} »</p>
+            @if (!targetMemberUid()) {
+              <div class="composer-locked-field">
+                <span class="locked-label">Contre</span>
+                <span class="locked-value">À décider ensemble</span>
+              </div>
+            } @else {
+              <ion-select
+                class="composer-select"
+                interface="popover"
+                label="Contre (son stock)"
+                labelPlacement="stacked"
+                fill="outline"
+                placeholder="Aucun dispo"
+                [disabled]="targetAvailableStock().length === 0"
+                [ngModel]="requestedChoice()"
+                (ngModelChange)="requestedChoice.set($event)"
+              >
+                @for (item of targetAvailableStock(); track item.chocolateName) {
+                  <ion-select-option [value]="item.chocolateName">
+                    {{ item.chocolateName }} ({{ item.quantity }})
+                  </ion-select-option>
+                }
+              </ion-select>
+            }
+          </div>
+
+          @if (myAvailableStock().length === 0) {
+            <p class="trade-warning">
+              Tu n'as aucun chocolat disponible à échanger (tout est déjà mangé ou réservé).
+            </p>
+          } @else if (targetMemberUid() && targetAvailableStock().length === 0) {
+            <p class="trade-warning">
+              Cette personne n'a aucun autre chocolat disponible en stock.
+            </p>
+          } @else {
+            <p class="trade-preview">« {{ tradePreview() }} »</p>
+          }
 
           <div class="composer-actions">
             <ion-button
@@ -126,8 +106,12 @@
             >
               Annuler
             </ion-button>
-            <ion-button size="small" [disabled]="tradeBusy()" (click)="submitTrade()">
-              Publier l'annonce
+            <ion-button
+              size="small"
+              [disabled]="tradeBusy() || !canPublishTrade()"
+              (click)="submitTrade()"
+            >
+              Publier
             </ion-button>
           </div>
         </div>
@@ -160,9 +144,53 @@
               @if (trade.status === 'open') {
                 @let me = authService.currentMember();
                 @if (me && trade.authorUid !== me.uid && (!trade.targetUid || trade.targetUid === me.uid)) {
-                  <ion-button size="small" color="secondary" (click)="acceptTrade(trade)">
-                    Accepter
-                  </ion-button>
+                  @if (activeActionTradeId() === trade.id) {
+                    <div class="trade-inline-action">
+                      <ion-select
+                        class="inline-select"
+                        interface="popover"
+                        [label]="activeActionMode() === 'accept-open' ? 'Je donne' : 'Contre-proposer'"
+                        labelPlacement="stacked"
+                        fill="outline"
+                        [ngModel]="actionSelectedChocolate()"
+                        (ngModelChange)="actionSelectedChocolate.set($event)"
+                      >
+                        @for (item of counterOptionsForTrade(trade); track item.chocolateName) {
+                          <ion-select-option [value]="item.chocolateName">
+                            {{ item.chocolateName }} ({{ item.quantity }})
+                          </ion-select-option>
+                        }
+                      </ion-select>
+                      <div class="inline-action-btns">
+                        <ion-button size="small" fill="outline" color="medium" (click)="closeTradeAction()">
+                          Annuler
+                        </ion-button>
+                        <ion-button size="small" color="secondary" [disabled]="tradeBusy()" (click)="confirmTradeAction(trade)">
+                          Valider
+                        </ion-button>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="trade-row-actions">
+                      <ion-button
+                        size="small"
+                        color="secondary"
+                        [disabled]="tradeBusy() || (!isOpenEndedTrade(trade) && !hasRequestedInMyStock(trade))"
+                        (click)="onAcceptClick(trade)"
+                      >
+                        Accepter
+                      </ion-button>
+                      <ion-button
+                        size="small"
+                        fill="outline"
+                        color="primary"
+                        [disabled]="tradeBusy() || counterOptionsForTrade(trade).length === 0"
+                        (click)="openCounterPropose(trade)"
+                      >
+                        Contre-proposer
+                      </ion-button>
+                    </div>
+                  }
                 } @else if (me && trade.authorUid === me.uid) {
                   <ion-button size="small" fill="outline" color="medium" (click)="cancelTrade(trade)">
                     Annuler

@@ -59,12 +59,20 @@ export class InventoryService {
 
     for (const trade of trades) {
       addQty(trade.authorUid, trade.offeredChocolate, -1);
-      if (trade.requestedChocolate && trade.requestedChocolate.toLowerCase() !== 'peu importe') {
+      if (
+        trade.requestedChocolate &&
+        trade.requestedChocolate.toLowerCase() !== 'peu importe' &&
+        trade.requestedChocolate.toLowerCase() !== 'à décider ensemble'
+      ) {
         addQty(trade.authorUid, trade.requestedChocolate, 1);
       }
       if (trade.acceptedByUid) {
         addQty(trade.acceptedByUid, trade.offeredChocolate, 1);
-        if (trade.requestedChocolate && trade.requestedChocolate.toLowerCase() !== 'peu importe') {
+        if (
+          trade.requestedChocolate &&
+          trade.requestedChocolate.toLowerCase() !== 'peu importe' &&
+          trade.requestedChocolate.toLowerCase() !== 'à décider ensemble'
+        ) {
           addQty(trade.acceptedByUid, trade.requestedChocolate, -1);
         }
       }
@@ -117,13 +125,21 @@ export class InventoryService {
     for (const trade of trades) {
       if (supervisors.has(trade.authorUid)) {
         addQty(trade.offeredChocolate, -1);
-        if (trade.requestedChocolate && trade.requestedChocolate.toLowerCase() !== 'peu importe') {
+        if (
+          trade.requestedChocolate &&
+          trade.requestedChocolate.toLowerCase() !== 'peu importe' &&
+          trade.requestedChocolate.toLowerCase() !== 'à décider ensemble'
+        ) {
           addQty(trade.requestedChocolate, 1);
         }
       }
       if (trade.acceptedByUid && supervisors.has(trade.acceptedByUid)) {
         addQty(trade.offeredChocolate, 1);
-        if (trade.requestedChocolate && trade.requestedChocolate.toLowerCase() !== 'peu importe') {
+        if (
+          trade.requestedChocolate &&
+          trade.requestedChocolate.toLowerCase() !== 'peu importe' &&
+          trade.requestedChocolate.toLowerCase() !== 'à décider ensemble'
+        ) {
           addQty(trade.requestedChocolate, -1);
         }
       }
@@ -134,6 +150,35 @@ export class InventoryService {
       .map((entry) => ({ chocolateName: entry.label, quantity: entry.qty }))
       .sort((a, b) => a.chocolateName.localeCompare(b.chocolateName, 'fr'));
   });
+
+  readonly openTradeReservationsByUid = computed<Record<string, Record<string, number>>>(() => {
+    const reserved: Record<string, Record<string, number>> = {};
+    for (const trade of this.tradeService.openTrades()) {
+      const key = trade.offeredChocolate.trim().toLowerCase();
+      if (!key) continue;
+      reserved[trade.authorUid] ??= {};
+      reserved[trade.authorUid][key] = (reserved[trade.authorUid][key] ?? 0) + 1;
+    }
+    return reserved;
+  });
+
+  getAvailableTradeStock(memberUid: string): ChocolateStockEntry[] {
+    const member = this.calendarService.members().find((m) => m.uid === memberUid);
+    const baseStock = member?.isSupervisor
+      ? this.supervisorSurplus()
+      : (this.stockByMemberUid()[memberUid] ?? []);
+    const reserved = this.openTradeReservationsByUid()[memberUid] ?? {};
+
+    return baseStock
+      .map((entry) => {
+        const used = reserved[entry.chocolateName.trim().toLowerCase()] ?? 0;
+        return {
+          chocolateName: entry.chocolateName,
+          quantity: entry.quantity - used,
+        };
+      })
+      .filter((entry) => entry.quantity > 0);
+  }
 
   constructor() {
     effect(() => {

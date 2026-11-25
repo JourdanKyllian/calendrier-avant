@@ -12,17 +12,26 @@ cloudflare-worker/node_modules/
 npm-debug.log
 yarn-error.log
 
-# Firebase & Cloudflare Worker local state/secrets
+# Firebase & Cloudflare Worker local state/secrets/logs
 .firebase/
 .wrangler/
 **/.wrangler/
 .dev.vars
+.dev.vars.*
 .env
 .env.*
 !.env.example
 src/environments/environment.ts
 src/environments/environment.prod.ts
 cloudflare-worker/wrangler.toml
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+*.log
+*.pem
+*.key
+*firebase-adminsdk*.json
+*service-account*.json
 
 # IDEs and editors
 .idea/

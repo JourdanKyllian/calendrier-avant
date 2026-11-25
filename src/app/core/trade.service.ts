@@ -14,6 +14,11 @@ import { ensureAnonymousAuth, getFirebaseClients } from './firebase';
 import { TradeOffer } from './models';
 import { PushNotificationService } from './push-notification.service';
 
+export function isOpenRequestedChocolate(requestedChocolate?: string): boolean {
+  const normalized = (requestedChocolate ?? '').trim().toLowerCase();
+  return !normalized || normalized === 'peu importe' || normalized === 'à décider ensemble';
+}
+
 export function formatTradeMessage(
   authorName: string,
   offeredChocolate: string,
@@ -23,8 +28,8 @@ export function formatTradeMessage(
   const offered = offeredChocolate.trim();
   const requested = requestedChocolate.trim();
   const targetPrefix = targetName?.trim() ? `à ${targetName.trim()} ` : '';
-  if (!requested || requested.toLowerCase() === 'peu importe') {
-    return `${authorName} propose ${targetPrefix}d’échanger son ${offered} (ouvert aux propositions)`;
+  if (isOpenRequestedChocolate(requested)) {
+    return `${authorName} propose ${targetPrefix}d’échanger son ${offered} (à décider ensemble)`;
   }
   return `${authorName} propose ${targetPrefix}d’échanger son ${offered} contre un ${requested}`;
 }
@@ -103,7 +108,12 @@ export class TradeService {
     if (!offered) {
       throw new Error('Choisis le chocolat que tu proposes.');
     }
-    const requested = requestedChocolate.trim() || 'Peu importe';
+    const requested = target?.uid
+      ? requestedChocolate.trim() || 'À décider ensemble'
+      : 'À décider ensemble';
+    if (!isOpenRequestedChocolate(requested) && offered.toLowerCase() === requested.toLowerCase()) {
+      throw new Error('Impossible d’échanger un chocolat contre le même chocolat.');
+    }
     const message = formatTradeMessage(member.name, offered, requested, target?.name);
 
     const payload: Omit<TradeOffer, 'id'> = {
@@ -132,7 +142,7 @@ export class TradeService {
     return created;
   }
 
-  async acceptTrade(trade: TradeOffer): Promise<void> {
+  async acceptTrade(trade: TradeOffer, chosenReturnChocolate?: string): Promise<void> {
     const member = this.authService.currentMember();
     if (!member) {
       throw new Error('Connexion requise.');
@@ -147,9 +157,23 @@ export class TradeService {
       throw new Error(`Cet échange est réservé à ${trade.targetName}.`);
     }
 
+    const finalRequested = isOpenRequestedChocolate(trade.requestedChocolate)
+      ? (chosenReturnChocolate ?? '').trim()
+      : trade.requestedChocolate.trim();
+    if (!finalRequested) {
+      throw new Error('Choisis le chocolat que tu donnes en échange.');
+    }
+    if (finalRequested.toLowerCase() === trade.offeredChocolate.trim().toLowerCase()) {
+      throw new Error('Impossible d’échanger un chocolat contre le même chocolat.');
+    }
+
+    const updatedMessage = `${trade.authorName} échange son ${trade.offeredChocolate} contre le ${finalRequested} de ${member.name}`;
+
     const { db } = getFirebaseClients();
     await updateDoc(doc(db, 'trades', trade.id), {
       status: 'accepted',
+      requestedChocolate: finalRequested,
+      message: updatedMessage,
       acceptedByUid: member.uid,
       acceptedByName: member.name,
       acceptedAt: Date.now(),
@@ -160,7 +184,40 @@ export class TradeService {
       authorName: trade.authorName,
       acceptedByUid: member.uid,
       acceptedByName: member.name,
-      message: `${member.name} a accepté l'échange de ${trade.authorName} (${trade.offeredChocolate})`,
+      message: `${member.name} a accepté l'échange de ${trade.authorName} (${trade.offeredChocolate} ↔ ${finalRequested})`,
+    });
+  }
+
+  async counterProposeTrade(trade: TradeOffer, newOfferedChocolate: string): Promise<TradeOffer> {
+    const member = this.authService.currentMember();
+    if (!member) {
+      throw new Error('Connexion requise.');
+    }
+    if (trade.status !== 'open') {
+      throw new Error('Cet échange n’est plus disponible.');
+    }
+    if (trade.authorUid === member.uid) {
+      throw new Error('Tu ne peux pas contre-proposer ton propre échange.');
+    }
+    if (trade.targetUid && trade.targetUid !== member.uid) {
+      throw new Error(`Cet échange est réservé à ${trade.targetName}.`);
+    }
+    const offered = newOfferedChocolate.trim();
+    if (!offered) {
+      throw new Error('Choisis le chocolat que tu proposes en échange.');
+    }
+    if (offered.toLowerCase() === trade.offeredChocolate.trim().toLowerCase()) {
+      throw new Error('Impossible de contre-proposer le même chocolat.');
+    }
+
+    const { db } = getFirebaseClients();
+    await updateDoc(doc(db, 'trades', trade.id), {
+      status: 'cancelled',
+    });
+
+    return this.proposeTrade(offered, trade.offeredChocolate, {
+      uid: trade.authorUid,
+      name: trade.authorName,
     });
   }
 

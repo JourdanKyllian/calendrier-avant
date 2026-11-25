@@ -3,10 +3,10 @@ import { TestBed } from '@angular/core/testing';
 import { provideIonicAngular } from '@ionic/angular';
 import { vi } from 'vitest';
 import { AuthService } from '../../core/auth.service';
-import { CalendarConfigService } from '../../core/calendar-config.service';
 import { CalendarService } from '../../core/calendar.service';
 import { FirebaseCalendarStore } from '../../core/firebase-calendar.store';
-import { DayClaim, Member, TradeOffer } from '../../core/models';
+import { InventoryService } from '../../core/inventory.service';
+import { ChocolateStockEntry, DayClaim, Member, TradeOffer } from '../../core/models';
 import { TradeService } from '../../core/trade.service';
 import { HistoryPage } from './history.page';
 
@@ -133,9 +133,23 @@ describe('HistoryPage', () => {
         { provide: FirebaseCalendarStore, useValue: mockStore },
         { provide: TradeService, useValue: mockTradeService },
         {
-          provide: CalendarConfigService,
+          provide: InventoryService,
           useValue: {
-            catalogItems: () => [],
+            getAvailableTradeStock: (uid: string): ChocolateStockEntry[] => {
+              if (uid === 'u1') {
+                return [
+                  { chocolateName: 'Kinder Bueno', quantity: 1 },
+                  { chocolateName: 'Mars', quantity: 2 },
+                ];
+              }
+              if (uid === 'u2') {
+                return [
+                  { chocolateName: 'Kinder Bueno', quantity: 1 },
+                  { chocolateName: 'KitKat', quantity: 1 },
+                ];
+              }
+              return [];
+            },
           },
         },
       ],
@@ -200,7 +214,11 @@ describe('HistoryPage', () => {
     publishBtn.click();
     await fixture.whenStable();
 
-    expect(mockTradeService.proposeTrade).toHaveBeenCalledWith('Kinder Bueno', 'Peu importe', null);
+    expect(mockTradeService.proposeTrade).toHaveBeenCalledWith(
+      'Kinder Bueno',
+      'À décider ensemble',
+      null
+    );
     expect(tradesSignal().length).toBe(1);
 
     tradesSignal.set([
@@ -223,5 +241,18 @@ describe('HistoryPage', () => {
     await fixture.whenStable();
 
     expect(mockTradeService.acceptTrade).toHaveBeenCalled();
+  });
+
+  it('filters out the offered chocolate from target stock to prevent useless same-chocolate trades', async () => {
+    const fixture = TestBed.createComponent(HistoryPage);
+    await fixture.whenStable();
+    const component = fixture.componentInstance;
+
+    component.openTradeComposer('u2', 'KitKat');
+    expect(component.offeredChoice()).toBe('Kinder Bueno');
+    expect(component.targetAvailableStock().map((s) => s.chocolateName)).toEqual(['KitKat']);
+
+    component.onTargetChange('');
+    expect(component.requestedChoice()).toBe('À décider ensemble');
   });
 });
