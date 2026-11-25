@@ -60,6 +60,75 @@
       <div class="stats-cards-grid">
         <ion-card>
           <ion-card-header>
+            <ion-card-title>Noter un chocolat mangé (sans échange)</ion-card-title>
+            <p class="card-subtitle">
+              Déduis un chocolat pris directement du surplus ou du stock d'un membre.
+            </p>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="supervisor-log-form">
+              <ion-select
+                class="log-select"
+                interface="popover"
+                label="Qui ?"
+                labelPlacement="stacked"
+                fill="outline"
+                [ngModel]="logMemberUid()"
+                (ngModelChange)="logMemberUid.set($event); onLogSourceOrMemberChange()"
+              >
+                <ion-select-option value="">Prise directe (surplus)</ion-select-option>
+                @for (p of calendarService.participants(); track p.uid) {
+                  <ion-select-option [value]="p.uid">{{ p.emoji }} {{ p.name }}</ion-select-option>
+                }
+              </ion-select>
+
+              <ion-select
+                class="log-select"
+                interface="popover"
+                label="Depuis quel stock ?"
+                labelPlacement="stacked"
+                fill="outline"
+                [ngModel]="logSource()"
+                (ngModelChange)="logSource.set($event); onLogSourceOrMemberChange()"
+              >
+                <ion-select-option value="surplus">Surplus superviseur</ion-select-option>
+                @if (logMemberUid()) {
+                  <ion-select-option value="member">Stock du membre</ion-select-option>
+                }
+              </ion-select>
+
+              <ion-select
+                class="log-select"
+                interface="popover"
+                label="Chocolat"
+                labelPlacement="stacked"
+                fill="outline"
+                placeholder="Aucun dispo"
+                [disabled]="logAvailableStock().length === 0"
+                [ngModel]="logChocolate()"
+                (ngModelChange)="logChocolate.set($event)"
+              >
+                @for (item of logAvailableStock(); track item.chocolateName) {
+                  <ion-select-option [value]="item.chocolateName">
+                    {{ item.chocolateName }} ({{ item.quantity }})
+                  </ion-select-option>
+                }
+              </ion-select>
+
+              <ion-button
+                expand="block"
+                color="secondary"
+                [disabled]="busy() || !logChocolate()"
+                (click)="submitSupervisorConsumption()"
+              >
+                Noter -1 mangé
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header>
             <ion-card-title>Surplus hors calendrier</ion-card-title>
             <p class="card-subtitle">
               Indique uniquement les chocolats qu'il te reste en plus du calendrier (indépendant des 24 cases).
@@ -126,75 +195,6 @@
             } @else {
               <p class="none-yet">Aucun chocolat enregistré pour le moment.</p>
             }
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Noter un chocolat mangé (sans échange)</ion-card-title>
-            <p class="card-subtitle">
-              Déduis un chocolat pris directement du surplus ou du stock d'un membre.
-            </p>
-          </ion-card-header>
-          <ion-card-content>
-            <div class="supervisor-log-form">
-              <ion-select
-                class="log-select"
-                interface="popover"
-                label="Qui ?"
-                labelPlacement="stacked"
-                fill="outline"
-                [ngModel]="logMemberUid()"
-                (ngModelChange)="logMemberUid.set($event); onLogSourceOrMemberChange()"
-              >
-                <ion-select-option value="">Prise directe (surplus)</ion-select-option>
-                @for (p of calendarService.participants(); track p.uid) {
-                  <ion-select-option [value]="p.uid">{{ p.emoji }} {{ p.name }}</ion-select-option>
-                }
-              </ion-select>
-
-              <ion-select
-                class="log-select"
-                interface="popover"
-                label="Depuis quel stock ?"
-                labelPlacement="stacked"
-                fill="outline"
-                [ngModel]="logSource()"
-                (ngModelChange)="logSource.set($event); onLogSourceOrMemberChange()"
-              >
-                <ion-select-option value="surplus">Surplus superviseur</ion-select-option>
-                @if (logMemberUid()) {
-                  <ion-select-option value="member">Stock du membre</ion-select-option>
-                }
-              </ion-select>
-
-              <ion-select
-                class="log-select"
-                interface="popover"
-                label="Chocolat"
-                labelPlacement="stacked"
-                fill="outline"
-                placeholder="Aucun dispo"
-                [disabled]="logAvailableStock().length === 0"
-                [ngModel]="logChocolate()"
-                (ngModelChange)="logChocolate.set($event)"
-              >
-                @for (item of logAvailableStock(); track item.chocolateName) {
-                  <ion-select-option [value]="item.chocolateName">
-                    {{ item.chocolateName }} ({{ item.quantity }})
-                  </ion-select-option>
-                }
-              </ion-select>
-
-              <ion-button
-                expand="block"
-                color="secondary"
-                [disabled]="busy() || !logChocolate()"
-                (click)="submitSupervisorConsumption()"
-              >
-                Noter -1 mangé
-              </ion-button>
-            </div>
           </ion-card-content>
         </ion-card>
       </div>
