@@ -87,8 +87,8 @@ ion-toolbar ion-title {
 }
 
 ion-header ion-toolbar:first-of-type {
-  --padding-top: max(8px, env(safe-area-inset-top));
-  --padding-bottom: 8px;
+  --padding-top: 4px;
+  --padding-bottom: 4px;
 }
 
 .header-ios .header-background,
