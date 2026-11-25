@@ -39,6 +39,7 @@ Preserve this warm artisanal chocolate/Christmas palette. Do not introduce gener
 </visual_tokens>
 
 <technical_invariants>
+- **Grounding (no training-data guessing)**: Never rely on training-data assumptions or memory for APIs, package versions, CSS behavior, or existing components. Always read the actual files (`package.json`, templates, styles, services) and verify visually/via tests after editing.
 - **Ionic Modals**: Any Angular component rendered inside `<ion-modal>` (such as `SupervisorDaysModalComponent`) MUST declare `host: { class: 'ion-page' }` and `:host { display: flex; flex-direction: column; width: 100%; height: 100%; }` so `<ion-content>` never collapses to `0px`.
 - **Distinct Chocolate SVGs**: Every chocolate variety in `src/app/shared/chocolate-icon.component.ts` must keep a recognizable, distinct SVG silhouette.
 - **Verification**: After UI or logic edits, run `HOME=/tmp NG_CLI_ANALYTICS=false npm test -- --watch=false && HOME=/tmp NG_CLI_ANALYTICS=false npm run build` and verify zero test/build failures.

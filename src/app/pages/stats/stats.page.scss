@@ -1,5 +1,8 @@
 .overview-card {
   margin-top: 0;
+  --background: linear-gradient(145deg, #2c1810 0%, #442419 100%);
+  border: 1px solid rgba(198, 139, 44, 0.42);
+  box-shadow: 0 8px 22px rgba(44, 24, 16, 0.16);
 }
 
 .overview-grid {
@@ -11,13 +14,21 @@
 
 .overview-grid .meta {
   display: block;
-  font-size: 0.78rem;
-  color: #6f5b52;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: rgba(255, 248, 240, 0.78);
 }
 
 .overview-grid strong {
-  font-size: 1.3rem;
-  color: #8b2635;
+  font-family: var(--ca-font-display, Georgia, serif);
+  font-size: 1.55rem;
+  color: #f0be64;
+}
+
+ion-progress-bar {
+  height: 8px;
+  border-radius: 999px;
+  --background: var(--ca-surface-subtle, #f5ede3);
 }
 
 .member-row {
@@ -34,19 +45,27 @@
 }
 
 .member-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   color: #ffffff;
+  box-shadow: 0 0 0 2px #fffdfb, 0 0 0 3.5px rgba(198, 139, 44, 0.35);
 }
 
 .member-sub {
   font-size: 0.8rem;
   color: #6f5b52;
+}
+
+.member-calm-state {
+  margin: 10px 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1e6b52;
 }
 
 .stats-section {
@@ -105,30 +124,57 @@
 
 .stock-list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.stock-pill {
-  display: inline-flex;
+.stock-row {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 8px;
-  border-radius: 999px;
-  background: #faf5ee;
-  border: 1px solid rgba(44, 24, 16, 0.14);
-  font-size: 0.78rem;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 46px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: var(--ca-surface-subtle, #f5ede3);
+  border: 1px solid var(--ca-border, rgba(44, 24, 16, 0.1));
+  font-size: 0.84rem;
   font-weight: 700;
   color: #2c1810;
 }
 
+.stock-item-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.stock-qty {
+  color: #8b2635;
+  flex-shrink: 0;
+}
+
+.stock-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .stock-action {
   border: none;
-  border-radius: 999px;
-  padding: 2px 8px;
-  font-size: 0.7rem;
-  font-weight: 800;
+  border-radius: 10px;
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  flex-shrink: 0;
   cursor: pointer;
+  transition: transform 0.15s ease-out;
+}
+
+.stock-action:active {
+  transform: scale(0.97);
 }
 
 .stock-action.eat {

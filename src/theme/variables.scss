@@ -20,6 +20,13 @@
   --ion-color-tertiary-shade: #ae7a27;
   --ion-color-tertiary-tint: #cc9741;
 
+  --ion-color-success: #1e6b52;
+  --ion-color-success-rgb: 30, 107, 82;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #1a5e48;
+  --ion-color-success-tint: #357a63;
+
   --ion-background-color: #faf5ee;
   --ion-background-color-rgb: 250, 245, 238;
   --ion-text-color: #2c1810;
@@ -32,4 +39,17 @@
   --ion-tab-bar-background: #fffdfb;
   --ion-tab-bar-color: #7c675d;
   --ion-tab-bar-color-selected: #8b2635;
+
+  /* ChocoAvent warm artisanal design tokens */
+  --ion-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ca-font-display: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  --ca-surface-subtle: #f5ede3;
+  --ca-surface-warm: #fff8f0;
+  --ca-border: rgba(44, 24, 16, 0.1);
+  --ca-border-strong: rgba(44, 24, 16, 0.18);
+  --ca-gold-border: rgba(198, 139, 44, 0.42);
+  --ca-text-muted: #675248;
+  --ca-radius-card: 18px;
+  --ca-radius-control: 12px;
+  --ca-shadow-card: 0 4px 14px rgba(44, 24, 16, 0.06);
 }

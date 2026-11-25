@@ -44,20 +44,22 @@
 }
 
 .big-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   color: #ffffff;
+  box-shadow: 0 0 0 3px #fff8f0, 0 0 0 5px rgba(198, 139, 44, 0.45);
 }
 
 .profile-header h2 {
   margin: 0 0 6px;
+  font-family: var(--ca-font-display, Georgia, serif);
   font-weight: 800;
-  font-size: 1.25rem;
+  font-size: 1.35rem;
 }
 
 .badges {
@@ -80,12 +82,12 @@
 }
 
 .emoji-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  border: 1px solid rgba(44, 24, 16, 0.14);
-  background: #fff8f0;
-  font-size: 1.2rem;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--ca-border, rgba(44, 24, 16, 0.14));
+  background: var(--ca-surface-warm, #fff8f0);
+  font-size: 1.25rem;
   cursor: pointer;
 }
 
@@ -95,10 +97,12 @@
 }
 
 .color-btn {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
+  margin: 4px;
   border-radius: 999px;
-  border: 2px solid transparent;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 1px 4px rgba(44, 24, 16, 0.18);
   cursor: pointer;
 }
 

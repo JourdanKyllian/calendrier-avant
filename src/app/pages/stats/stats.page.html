@@ -51,65 +51,68 @@
           color="primary"
         ></ion-progress-bar>
 
-        <div class="stats-section">
-          <span class="section-label">Cases déjà prises</span>
-          @if (stat.takenDayNumbers.length > 0) {
-            <div class="breakdown-chips">
-              @for (dayNum of stat.takenDayNumbers; track dayNum) {
-                <span class="taken-pill">#{{ dayNum }}</span>
-              }
-            </div>
-          } @else {
-            <p class="none-yet">Aucune case réclamée pour le moment.</p>
-          }
-        </div>
+        @let stock = inventoryService.getMemberStock(stat.member.uid);
+        @let me = authService.currentMember();
 
-        <div class="stats-section">
-          <span class="section-label">Manque à récupérer</span>
+        @if (stat.takenDayNumbers.length === 0 && stat.missingDayNumbers.length === 0 && stock.length === 0) {
+          <p class="member-calm-state">✨ À jour — aucune case réclamée ni chocolat en stock</p>
+        } @else {
+          @if (stat.takenDayNumbers.length > 0) {
+            <div class="stats-section">
+              <span class="section-label">Cases déjà prises</span>
+              <div class="breakdown-chips">
+                @for (dayNum of stat.takenDayNumbers; track dayNum) {
+                  <span class="taken-pill">#{{ dayNum }}</span>
+                }
+              </div>
+            </div>
+          }
+
           @if (stat.missingDayNumbers.length > 0) {
-            <div class="breakdown-chips">
-              @for (dayNum of stat.missingDayNumbers; track dayNum) {
-                <span class="missing-pill">Case #{{ dayNum }}</span>
-              }
+            <div class="stats-section">
+              <span class="section-label">Manque à récupérer</span>
+              <div class="breakdown-chips">
+                @for (dayNum of stat.missingDayNumbers; track dayNum) {
+                  <span class="missing-pill">Case #{{ dayNum }}</span>
+                }
+              </div>
             </div>
-          } @else {
-            <p class="all-done">✓ À jour sur toutes les cases débloquées.</p>
           }
-        </div>
-        <div class="stats-section">
-          <span class="section-label">Stock disponible (non mangés)</span>
-          @let stock = inventoryService.getMemberStock(stat.member.uid);
-          @let me = authService.currentMember();
+
           @if (stock.length > 0) {
-            <div class="stock-list">
-              @for (item of stock; track item.chocolateName) {
-                <div class="stock-pill">
-                  <app-chocolate-icon [name]="item.chocolateName" [size]="18" />
-                  <span>{{ item.quantity }}× {{ item.chocolateName }}</span>
-                  @if (me && me.uid === stat.member.uid) {
-                    <button
-                      type="button"
-                      class="stock-action eat"
-                      (click)="markEaten(item.chocolateName)"
-                    >
-                      Mangé -1
-                    </button>
-                  } @else if (me && me.uid !== stat.member.uid) {
-                    <button
-                      type="button"
-                      class="stock-action trade"
-                      (click)="proposeTargetedTrade(stat.member.uid, item.chocolateName)"
-                    >
-                      Échanger
-                    </button>
-                  }
-                </div>
-              }
+            <div class="stats-section">
+              <span class="section-label">Stock disponible (non mangés)</span>
+              <div class="stock-list">
+                @for (item of stock; track item.chocolateName) {
+                  <div class="stock-row">
+                    <div class="stock-item-info">
+                      <app-chocolate-icon [name]="item.chocolateName" [size]="20" />
+                      <span class="stock-qty tabular-nums">{{ item.quantity }}×</span>
+                      <span class="stock-name">{{ item.chocolateName }}</span>
+                    </div>
+                    @if (me && me.uid === stat.member.uid) {
+                      <button
+                        type="button"
+                        class="stock-action eat"
+                        (click)="markEaten(item.chocolateName)"
+                      >
+                        Mangé -1
+                      </button>
+                    } @else if (me && me.uid !== stat.member.uid) {
+                      <button
+                        type="button"
+                        class="stock-action trade"
+                        (click)="proposeTargetedTrade(stat.member.uid, item.chocolateName)"
+                      >
+                        Échanger
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
             </div>
-          } @else {
-            <p class="none-yet">Aucun chocolat en stock pour le moment.</p>
           }
-        </div>
+        }
       </ion-card-content>
     </ion-card>
   }
@@ -134,9 +137,12 @@
         @if (surplus.length > 0) {
           <div class="stock-list">
             @for (item of surplus; track item.chocolateName) {
-              <div class="stock-pill">
-                <app-chocolate-icon [name]="item.chocolateName" [size]="18" />
-                <span>{{ item.quantity }}× {{ item.chocolateName }}</span>
+              <div class="stock-row">
+                <div class="stock-item-info">
+                  <app-chocolate-icon [name]="item.chocolateName" [size]="20" />
+                  <span class="stock-qty tabular-nums">{{ item.quantity }}×</span>
+                  <span class="stock-name">{{ item.chocolateName }}</span>
+                </div>
                 @if (me && me.uid !== sup.uid) {
                   <button
                     type="button"

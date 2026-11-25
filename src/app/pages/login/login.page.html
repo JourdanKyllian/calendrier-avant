@@ -77,9 +77,8 @@
 
     @if (!authService.firebaseConfigured()) {
       <div class="demo-note">
-        <strong>Firebase à connecter</strong> : renseigne tes clés dans
-        <code>src/environments/environment.ts</code> et
-        <code>src/environments/environment.prod.ts</code>.
+        <strong>Firebase à connecter</strong> : configure <code>.env</code> puis exécute
+        <code>npm run env:sync</code>.
       </div>
     }
   </div>
