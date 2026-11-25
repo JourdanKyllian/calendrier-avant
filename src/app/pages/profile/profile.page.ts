@@ -133,9 +133,7 @@ export class ProfilePage {
     this.pushBusy.set(true);
     try {
       const res = await this.pushService.sendTestNotification();
-      if (res.ok) {
-        this.toastMessage.set(`Notification de test envoyée (HTTP ${res.status ?? 201}) !`);
-      } else {
+      if (!res.ok) {
         this.toastMessage.set(
           `Échec Push (HTTP ${res.status ?? '?'}) : ${res.detail || 'erreur inconnue'}`
         );
