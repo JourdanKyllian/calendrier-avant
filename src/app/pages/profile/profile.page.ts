@@ -20,20 +20,19 @@ import {
   IonToolbar,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { keyOutline, logOutOutline, notificationsOutline } from 'ionicons/icons';
+import { keyOutline, logOutOutline, notificationsOutline, personOutline } from 'ionicons/icons';
 import { AuthService } from '../../core/auth.service';
 import { CalendarService } from '../../core/calendar.service';
-import { InventoryService } from '../../core/inventory.service';
 import { MEMBER_COLORS, MEMBER_EMOJIS } from '../../core/models';
 import { PushNotificationService } from '../../core/push-notification.service';
-import { ChocolateIconComponent } from '../../shared/chocolate-icon.component';
+
+type ProfileTab = 'profile' | 'alerts' | 'pin';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [
     FormsModule,
-    ChocolateIconComponent,
     IonHeader,
     IonToolbar,
     IonTitle,
@@ -58,12 +57,12 @@ import { ChocolateIconComponent } from '../../shared/chocolate-icon.component';
 export class ProfilePage {
   protected readonly authService = inject(AuthService);
   protected readonly calendarService = inject(CalendarService);
-  protected readonly inventoryService = inject(InventoryService);
   protected readonly pushService = inject(PushNotificationService);
   private readonly router = inject(Router);
 
   readonly emojis = MEMBER_EMOJIS;
   readonly colors = MEMBER_COLORS;
+  readonly activeTab = signal<ProfileTab>('profile');
 
   currentPin = '';
   newPin = '';
@@ -76,7 +75,7 @@ export class ProfilePage {
   readonly toastMessage = signal('');
 
   constructor() {
-    addIcons({ keyOutline, logOutOutline, notificationsOutline });
+    addIcons({ keyOutline, logOutOutline, notificationsOutline, personOutline });
   }
 
   async selectEmoji(emoji: string): Promise<void> {
