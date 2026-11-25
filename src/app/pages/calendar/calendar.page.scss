@@ -294,3 +294,14 @@
   white-space: nowrap;
   opacity: 0.94;
 }
+
+.skeleton-pill {
+  min-height: 41px;
+  align-items: center;
+}
+
+.skeleton-day {
+  background: #f5ede3;
+  border-color: rgba(44, 24, 16, 0.08);
+  box-shadow: none;
+}

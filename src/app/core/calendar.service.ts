@@ -24,6 +24,9 @@ export class CalendarService {
 
   readonly members = signal<Member[]>([]);
   readonly claims = signal<DayClaim[]>([]);
+  readonly membersLoaded = signal(false);
+  readonly claimsLoaded = signal(false);
+  readonly isInitialLoading = computed(() => !this.membersLoaded() || !this.claimsLoaded());
   readonly pendingUndo = signal<PendingUndoBatch | null>(null);
   readonly syncStatus = signal<'live' | 'offline'>('offline');
 
@@ -48,9 +51,13 @@ export class CalendarService {
       this.loadedForUid = nextUid;
       this.teardownListeners();
       this.dismissPendingUndo();
+      this.membersLoaded.set(false);
+      this.claimsLoaded.set(false);
 
       if (!user || !this.authService.firebaseConfigured()) {
         this.syncStatus.set('offline');
+        this.membersLoaded.set(true);
+        this.claimsLoaded.set(true);
         return;
       }
 
@@ -139,6 +146,7 @@ export class CalendarService {
     const membersUnsub = this.store.subscribeMembers(
       (list) => {
         this.members.set(list);
+        this.membersLoaded.set(true);
         const current = this.authService.currentMember();
         if (current) {
           const fresh = list.find((m) => m.uid === current.uid);
@@ -148,15 +156,22 @@ export class CalendarService {
         }
         this.syncStatus.set('live');
       },
-      () => this.syncStatus.set('offline')
+      () => {
+        this.membersLoaded.set(true);
+        this.syncStatus.set('offline');
+      }
     );
 
     const claimsUnsub = this.store.subscribeClaims(
       (loaded) => {
         this.claims.set(loaded);
+        this.claimsLoaded.set(true);
         this.syncStatus.set('live');
       },
-      () => this.syncStatus.set('offline')
+      () => {
+        this.claimsLoaded.set(true);
+        this.syncStatus.set('offline');
+      }
     );
 
     this.unsubscribers.push(membersUnsub, claimsUnsub);

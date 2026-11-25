@@ -5,6 +5,33 @@
 </ion-header>
 
 <ion-content class="ion-padding">
+  @if (calendarService.isInitialLoading() || !tradeService.tradesLoaded()) {
+    <ion-card class="trades-card">
+      <ion-card-header class="trades-card-header">
+        <ion-skeleton-text [animated]="true" style="width: 45%; height: 20px; border-radius: 6px;"></ion-skeleton-text>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-skeleton-text [animated]="true" style="width: 100%; height: 42px; border-radius: 12px;"></ion-skeleton-text>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="filters">
+      @for (c of [1, 2, 3, 4]; track c) {
+        <ion-skeleton-text [animated]="true" style="width: 78px; height: 32px; border-radius: 999px;"></ion-skeleton-text>
+      }
+    </div>
+
+    <ion-list inset="true" class="history-list">
+      @for (row of [1, 2, 3, 4]; track row) {
+        <ion-item>
+          <ion-label>
+            <ion-skeleton-text [animated]="true" style="width: 75%; height: 15px; border-radius: 6px; margin-bottom: 6px;"></ion-skeleton-text>
+            <ion-skeleton-text [animated]="true" style="width: 40%; height: 12px; border-radius: 6px;"></ion-skeleton-text>
+          </ion-label>
+        </ion-item>
+      }
+    </ion-list>
+  } @else {
   <ion-card class="trades-card">
     <ion-card-header class="trades-card-header">
       <div class="trades-title-row">
@@ -212,7 +239,7 @@
 
   <h3 class="section-subtitle">Historique</h3>
 
-  <div class="history-layout" [class.split-member]="selectedMemberStats() !== null">
+  <div class="history-layout" [class.split-member]="selectedMemberStats() !== null || selectedSupervisor() !== null">
     <div class="history-left">
       <div class="filters">
         <ion-chip
@@ -223,7 +250,7 @@
           <ion-label>Tous</ion-label>
         </ion-chip>
 
-        @for (member of calendarService.participants(); track member.uid) {
+        @for (member of calendarService.members(); track member.uid) {
           <ion-chip
             [outline]="filterMemberUid() !== member.uid"
             color="primary"
@@ -234,7 +261,36 @@
         }
       </div>
 
-      @if (selectedMemberStats(); as memberStats) {
+      @if (selectedSupervisor(); as sup) {
+        <ion-card class="member-overview-card">
+          <ion-card-header>
+            <div class="member-head">
+              <div class="member-title">
+                <span class="member-avatar" [style.background]="sup.color">{{ sup.emoji }}</span>
+                <div>
+                  <ion-card-title>{{ sup.name }}</ion-card-title>
+                  <span class="member-sub">
+                    Superviseur • {{ configService.configuredCount() }}/24 cases configurées
+                  </span>
+                </div>
+              </div>
+              <ion-badge color="tertiary">Réserve</ion-badge>
+            </div>
+          </ion-card-header>
+          <ion-card-content>
+            <p class="composer-label">Surplus actuel disponible :</p>
+            @if (inventoryService.supervisorSurplus().length > 0) {
+              <div class="breakdown-chips">
+                @for (item of inventoryService.supervisorSurplus(); track item.chocolateName) {
+                  <span class="taken-pill">{{ item.quantity }}× {{ item.chocolateName }}</span>
+                }
+              </div>
+            } @else {
+              <p class="none-yet">Aucun surplus restant.</p>
+            }
+          </ion-card-content>
+        </ion-card>
+      } @else if (selectedMemberStats(); as memberStats) {
         <ion-card class="member-overview-card">
           <ion-card-header>
             <div class="member-head">
@@ -289,28 +345,34 @@
     </div>
 
     <div class="history-right">
-      @if (selectedMemberStats(); as memberStats) {
+      @if (selectedSupervisor(); as sup) {
+        <h3 class="section-subtitle">Journal de {{ sup.name }}</h3>
+      } @else if (selectedMemberStats(); as memberStats) {
         <h3 class="section-subtitle">Historique de {{ memberStats.member.name }}</h3>
       }
 
-      @if (filteredClaims().length > 0) {
+      @if (filteredTimeline().length > 0) {
         <ion-list inset="true" class="history-list">
-          @for (claim of filteredClaims(); track claim.id) {
+          @for (entry of filteredTimeline(); track entry.id) {
             <ion-item>
-              <span slot="start" class="take-emoji">{{ getMemberEmoji(claim.memberUid) }}</span>
+              <span slot="start" class="take-emoji">{{ entry.emoji }}</span>
               <ion-label>
-                <h3>
-                  <strong>{{ claim.memberName }}</strong> a pris la case
-                  <strong>{{ claim.dayNumber }} décembre</strong>
-                </h3>
-                <p>{{ claim.createdAt | date: 'dd/MM à HH:mm' }}</p>
+                @if (entry.kind === 'claim') {
+                  <h3>
+                    <strong>{{ entry.claim.memberName }}</strong> a pris la case
+                    <strong>{{ entry.claim.dayNumber }} décembre</strong>
+                  </h3>
+                } @else {
+                  <h3>{{ entry.label }}</h3>
+                }
+                <p>{{ entry.createdAt | date: 'dd/MM à HH:mm' }}</p>
               </ion-label>
-              @if (canDelete(claim)) {
+              @if (entry.kind === 'claim' && canDelete(entry.claim)) {
                 <ion-button
                   fill="clear"
                   color="danger"
                   slot="end"
-                  (click)="deleteClaim(claim)"
+                  (click)="deleteClaim(entry.claim)"
                   aria-label="Annuler cette prise"
                 >
                   <ion-icon name="trash-outline"></ion-icon>
@@ -320,7 +382,7 @@
           }
         </ion-list>
       } @else {
-        <p class="empty-history">Aucune prise enregistrée pour cette sélection.</p>
+        <p class="empty-history">Aucune activité enregistrée pour cette sélection.</p>
       }
     </div>
   </div>
@@ -332,4 +394,5 @@
     position="top"
     (didDismiss)="toastMessage.set('')"
   ></ion-toast>
+  }
 </ion-content>

@@ -18,6 +18,7 @@ import {
   IonList,
   IonSelect,
   IonSelectOption,
+  IonSkeletonText,
   IonTitle,
   IonToast,
   IonToolbar,
@@ -25,10 +26,17 @@ import {
 import { addIcons } from 'ionicons';
 import { swapHorizontalOutline, trashOutline } from 'ionicons/icons';
 import { AuthService } from '../../core/auth.service';
+import { CalendarConfigService } from '../../core/calendar-config.service';
 import { CalendarService } from '../../core/calendar.service';
 import { ADVENT_DAY_NUMBERS, canCancelClaim, getDayStatusForMember } from '../../core/equity';
 import { InventoryService } from '../../core/inventory.service';
-import { ChocolateStockEntry, DayClaim, DayVisualStatus, TradeOffer } from '../../core/models';
+import {
+  ChocolateConsumption,
+  ChocolateStockEntry,
+  DayClaim,
+  DayVisualStatus,
+  TradeOffer,
+} from '../../core/models';
 import {
   TradeService,
   formatTradeMessage,
@@ -55,6 +63,7 @@ import { ChocolateIconComponent } from '../../shared/chocolate-icon.component';
     IonIcon,
     IonSelect,
     IonSelectOption,
+    IonSkeletonText,
     IonToast,
     IonCard,
     IonCardHeader,
@@ -69,6 +78,7 @@ import { ChocolateIconComponent } from '../../shared/chocolate-icon.component';
 export class HistoryPage {
   protected readonly authService = inject(AuthService);
   protected readonly calendarService = inject(CalendarService);
+  protected readonly configService = inject(CalendarConfigService);
   protected readonly inventoryService = inject(InventoryService);
   protected readonly tradeService = inject(TradeService);
   private readonly route = inject(ActivatedRoute, { optional: true });
@@ -119,11 +129,80 @@ export class HistoryPage {
     return this.calendarService.memberStats().find((s) => s.member.uid === uid) ?? null;
   });
 
+  readonly selectedSupervisor = computed(() => {
+    const uid = this.filterMemberUid();
+    if (uid === 'all') return null;
+    const m = this.calendarService.members().find((member) => member.uid === uid);
+    return m?.isSupervisor ? m : null;
+  });
+
   readonly filteredClaims = computed(() => {
     const uid = this.filterMemberUid();
     const list = this.calendarService.claims();
     if (uid === 'all') return list;
     return list.filter((c) => c.memberUid === uid);
+  });
+
+  readonly filteredTimeline = computed(() => {
+    const uid = this.filterMemberUid();
+    type TimelineItem =
+      | { kind: 'claim'; id: string; createdAt: number; emoji: string; claim: DayClaim }
+      | {
+          kind: 'consumption';
+          id: string;
+          createdAt: number;
+          emoji: string;
+          label: string;
+          consumption: ChocolateConsumption;
+        }
+      | { kind: 'trade'; id: string; createdAt: number; emoji: string; label: string };
+
+    const items: TimelineItem[] = [];
+
+    for (const claim of this.calendarService.claims()) {
+      if (uid === 'all' || claim.memberUid === uid) {
+        items.push({
+          kind: 'claim',
+          id: `claim-${claim.id}`,
+          createdAt: claim.createdAt,
+          emoji: this.getMemberEmoji(claim.memberUid),
+          claim,
+        });
+      }
+    }
+
+    for (const c of this.inventoryService.consumptions()) {
+      const involves = uid === 'all' || c.memberUid === uid || c.recipientUid === uid;
+      if (!involves) continue;
+      const sourceMember = this.calendarService.members().find((m) => m.uid === c.memberUid);
+      const sourceName = sourceMember?.name ?? 'Membre';
+      const label = c.recipientName
+        ? `${c.recipientName} a mangé ${c.quantity}× ${c.chocolateName} (surplus de ${sourceName})`
+        : `${sourceName} a mangé ${c.quantity}× ${c.chocolateName}`;
+      items.push({
+        kind: 'consumption',
+        id: `eat-${c.id}`,
+        createdAt: c.createdAt,
+        emoji: sourceMember?.emoji ?? '🍫',
+        label,
+        consumption: c,
+      });
+    }
+
+    for (const t of this.tradeService.trades()) {
+      if (t.status !== 'accepted') continue;
+      const involves = uid === 'all' || t.authorUid === uid || t.acceptedByUid === uid;
+      if (!involves) continue;
+      items.push({
+        kind: 'trade',
+        id: `trade-${t.id}`,
+        createdAt: t.acceptedAt ?? t.createdAt,
+        emoji: '🔄',
+        label: t.message,
+      });
+    }
+
+    return items.sort((a, b) => b.createdAt - a.createdAt);
   });
 
   constructor() {

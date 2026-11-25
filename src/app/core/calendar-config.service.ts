@@ -17,6 +17,7 @@ export class CalendarConfigService {
 
   readonly chocolates = signal<ChocolateCatalogItem[]>([]);
   readonly dayConfigsMap = signal<Record<number, CalendarDayConfig>>({});
+  readonly configLoaded = signal(false);
 
   readonly configuredCount = computed(() => Object.keys(this.dayConfigsMap()).length);
 
@@ -57,8 +58,11 @@ export class CalendarConfigService {
       if (!user || !this.authService.firebaseConfigured()) {
         this.chocolates.set([]);
         this.dayConfigsMap.set({});
+        this.configLoaded.set(true);
         return;
       }
+
+      this.configLoaded.set(false);
 
       let active = true;
       void ensureAnonymousAuth()
@@ -105,8 +109,12 @@ export class CalendarConfigService {
                 }
               }
               this.dayConfigsMap.set(nextMap);
+              this.configLoaded.set(true);
             },
-            (err) => console.error('Erreur Firestore calendar_days :', err)
+            (err) => {
+              console.error('Erreur Firestore calendar_days :', err);
+              this.configLoaded.set(true);
+            }
           );
 
           this.unsubs.push(unsubChocos, unsubDays);

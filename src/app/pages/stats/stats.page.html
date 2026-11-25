@@ -7,7 +7,38 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  @if (authService.currentMember(); as me) {
+  @if (calendarService.isInitialLoading() || !configService.configLoaded() || !inventoryService.consumptionsLoaded()) {
+    <ion-card class="overview-card">
+      <ion-card-content class="overview-grid">
+        @for (col of [1, 2, 3]; track col) {
+          <div>
+            <ion-skeleton-text [animated]="true" style="width: 64px; height: 12px; margin: 0 auto 6px; border-radius: 6px;"></ion-skeleton-text>
+            <ion-skeleton-text [animated]="true" style="width: 40px; height: 24px; margin: 0 auto; border-radius: 6px;"></ion-skeleton-text>
+          </div>
+        }
+      </ion-card-content>
+    </ion-card>
+
+    <div class="stats-cards-grid">
+      @for (card of [1, 2]; track card) {
+        <ion-card>
+          <ion-card-header>
+            <ion-skeleton-text [animated]="true" style="width: 55%; height: 18px; border-radius: 6px;"></ion-skeleton-text>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="stock-list">
+              @for (row of [1, 2, 3]; track row) {
+                <div class="stock-row">
+                  <ion-skeleton-text [animated]="true" style="width: 60%; height: 16px; border-radius: 6px;"></ion-skeleton-text>
+                  <ion-skeleton-text [animated]="true" style="width: 72px; height: 28px; border-radius: 8px;"></ion-skeleton-text>
+                </div>
+              }
+            </div>
+          </ion-card-content>
+        </ion-card>
+      }
+    </div>
+  } @else if (authService.currentMember(); as me) {
     @if (me.isSupervisor) {
       <ion-card class="overview-card">
         <ion-card-content class="overview-grid">
@@ -93,6 +124,75 @@
             } @else {
               <p class="none-yet">Aucun chocolat enregistré pour le moment.</p>
             }
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Noter un chocolat mangé (sans échange)</ion-card-title>
+            <p class="card-subtitle">
+              Déduis un chocolat pris directement du surplus ou du stock d'un membre.
+            </p>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="supervisor-log-form">
+              <ion-select
+                class="log-select"
+                interface="popover"
+                label="Qui ?"
+                labelPlacement="stacked"
+                fill="outline"
+                [ngModel]="logMemberUid()"
+                (ngModelChange)="logMemberUid.set($event); onLogSourceOrMemberChange()"
+              >
+                <ion-select-option value="">Prise directe (surplus)</ion-select-option>
+                @for (p of calendarService.participants(); track p.uid) {
+                  <ion-select-option [value]="p.uid">{{ p.emoji }} {{ p.name }}</ion-select-option>
+                }
+              </ion-select>
+
+              <ion-select
+                class="log-select"
+                interface="popover"
+                label="Depuis quel stock ?"
+                labelPlacement="stacked"
+                fill="outline"
+                [ngModel]="logSource()"
+                (ngModelChange)="logSource.set($event); onLogSourceOrMemberChange()"
+              >
+                <ion-select-option value="surplus">Surplus superviseur</ion-select-option>
+                @if (logMemberUid()) {
+                  <ion-select-option value="member">Stock du membre</ion-select-option>
+                }
+              </ion-select>
+
+              <ion-select
+                class="log-select"
+                interface="popover"
+                label="Chocolat"
+                labelPlacement="stacked"
+                fill="outline"
+                placeholder="Aucun dispo"
+                [disabled]="logAvailableStock().length === 0"
+                [ngModel]="logChocolate()"
+                (ngModelChange)="logChocolate.set($event)"
+              >
+                @for (item of logAvailableStock(); track item.chocolateName) {
+                  <ion-select-option [value]="item.chocolateName">
+                    {{ item.chocolateName }} ({{ item.quantity }})
+                  </ion-select-option>
+                }
+              </ion-select>
+
+              <ion-button
+                expand="block"
+                color="secondary"
+                [disabled]="busy() || !logChocolate()"
+                (click)="submitSupervisorConsumption()"
+              >
+                Noter -1 mangé
+              </ion-button>
+            </div>
           </ion-card-content>
         </ion-card>
 

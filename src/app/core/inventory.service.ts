@@ -22,6 +22,7 @@ export class InventoryService {
   private readonly tradeService = inject(TradeService);
 
   readonly consumptions = signal<ChocolateConsumption[]>([]);
+  readonly consumptionsLoaded = signal(false);
 
   private unsubscribe: Unsubscribe | null = null;
   private loadedForUid: string | null | undefined = undefined;
@@ -145,6 +146,12 @@ export class InventoryService {
       }
     }
 
+    for (const c of this.consumptions()) {
+      if (supervisors.has(c.memberUid)) {
+        addQty(c.chocolateName, -c.quantity);
+      }
+    }
+
     return Array.from(map.values())
       .filter((entry) => entry.qty > 0)
       .map((entry) => ({ chocolateName: entry.label, quantity: entry.qty }))
@@ -190,9 +197,11 @@ export class InventoryService {
 
       if (!user || !this.authService.firebaseConfigured()) {
         this.consumptions.set([]);
+        this.consumptionsLoaded.set(true);
         return;
       }
 
+      this.consumptionsLoaded.set(false);
       let active = true;
       void ensureAnonymousAuth()
         .then(() => {
@@ -206,8 +215,12 @@ export class InventoryService {
                 ...(d.data() as Omit<ChocolateConsumption, 'id'>),
               }));
               this.consumptions.set(list);
+              this.consumptionsLoaded.set(true);
             },
-            (err) => console.error('Erreur Firestore consumptions :', err)
+            (err) => {
+              console.error('Erreur Firestore consumptions :', err);
+              this.consumptionsLoaded.set(true);
+            }
           );
         })
         .catch((err) => console.error('Erreur Auth anonyme consumptions :', err));
@@ -229,22 +242,40 @@ export class InventoryService {
     return this.stockByMemberUid()[uid] ?? [];
   }
 
-  async markEaten(chocolateName: string, quantity = 1): Promise<void> {
+  async markEaten(
+    chocolateName: string,
+    quantity = 1,
+    options?: {
+      sourceMemberUid?: string;
+      recipient?: { uid: string; name: string } | null;
+    }
+  ): Promise<void> {
     const member = this.authService.currentMember();
     if (!member) {
       throw new Error('Connexion requise.');
     }
-    if (member.isSupervisor) {
-      throw new Error('Compte superviseur : utilise ton surplus pour les échanges.');
+
+    const targetSourceUid = options?.sourceMemberUid?.trim() || member.uid;
+    if (member.isSupervisor && !options?.sourceMemberUid) {
+      throw new Error('Sélectionne le stock ou le membre concerné.');
+    }
+    if (!member.isSupervisor && targetSourceUid !== member.uid) {
+      throw new Error('Action réservée au superviseur.');
     }
 
     await ensureAnonymousAuth();
     const { db } = getFirebaseClients();
     await addDoc(collection(db, 'consumptions'), {
-      memberUid: member.uid,
+      memberUid: targetSourceUid,
       chocolateName: chocolateName.trim(),
       quantity,
       createdAt: Date.now(),
+      ...(options?.recipient?.uid
+        ? {
+            recipientUid: options.recipient.uid,
+            recipientName: options.recipient.name,
+          }
+        : {}),
     });
   }
 }

@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideIonicAngular } from '@ionic/angular';
 import { vi } from 'vitest';
 import { AuthService } from '../../core/auth.service';
+import { CalendarConfigService } from '../../core/calendar-config.service';
 import { CalendarService } from '../../core/calendar.service';
 import { FirebaseCalendarStore } from '../../core/firebase-calendar.store';
 import { InventoryService } from '../../core/inventory.service';
@@ -72,6 +73,7 @@ describe('HistoryPage', () => {
       );
     }),
     cancelTrade: vi.fn(async () => {}),
+    tradesLoaded: () => true,
   };
 
   beforeEach(async () => {
@@ -133,8 +135,17 @@ describe('HistoryPage', () => {
         { provide: FirebaseCalendarStore, useValue: mockStore },
         { provide: TradeService, useValue: mockTradeService },
         {
+          provide: CalendarConfigService,
+          useValue: {
+            configuredCount: () => 0,
+          },
+        },
+        {
           provide: InventoryService,
           useValue: {
+            consumptions: () => [],
+            consumptionsLoaded: () => true,
+            supervisorSurplus: () => [{ chocolateName: 'KitKat', quantity: 3 }],
             getAvailableTradeStock: (uid: string): ChocolateStockEntry[] => {
               if (uid === 'u1') {
                 return [
@@ -169,7 +180,7 @@ describe('HistoryPage', () => {
     const chipTexts = Array.from(el.querySelectorAll('ion-chip')).map((c) =>
       c.textContent?.trim()
     );
-    expect(chipTexts).toEqual(['Tous', '🎅 Kyllian', '🦌 Marie']);
+    expect(chipTexts).toEqual(['Tous', '🎅 Kyllian', '🦌 Marie', '👑 Maman']);
 
     expect(el.querySelectorAll('ion-item').length).toBe(2);
 

@@ -10,7 +10,29 @@
 </ion-header>
 
 <ion-content class="calendar-content">
-  @if (authService.currentMember(); as me) {
+  @if (!authService.authReady() || calendarService.isInitialLoading()) {
+    <div class="summary-strip">
+      <div class="summary-pill skeleton-pill">
+        <ion-skeleton-text [animated]="true" style="width: 100%; height: 20px; border-radius: 6px;"></ion-skeleton-text>
+      </div>
+      <div class="summary-pill skeleton-pill">
+        <ion-skeleton-text [animated]="true" style="width: 100%; height: 20px; border-radius: 6px;"></ion-skeleton-text>
+      </div>
+    </div>
+
+    <div class="legend-row">
+      <ion-skeleton-text [animated]="true" style="width: 210px; height: 14px; border-radius: 999px;"></ion-skeleton-text>
+    </div>
+
+    <div class="calendar-grid">
+      @for (dayNum of dayNumbers; track dayNum) {
+        <div class="day-card skeleton-day">
+          <ion-skeleton-text [animated]="true" style="width: 28px; height: 18px; border-radius: 6px;"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 65%; height: 12px; border-radius: 6px;"></ion-skeleton-text>
+        </div>
+      }
+    </div>
+  } @else if (authService.currentMember(); as me) {
     @if (me.hasDefaultPin) {
       <ion-card class="pin-alert-card">
         <ion-card-content class="pin-alert-inner">

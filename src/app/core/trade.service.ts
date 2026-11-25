@@ -40,6 +40,7 @@ export class TradeService {
   private readonly pushService = inject(PushNotificationService);
 
   readonly trades = signal<TradeOffer[]>([]);
+  readonly tradesLoaded = signal(false);
   readonly openTrades = computed(() => this.trades().filter((t) => t.status === 'open'));
 
   private unsubscribe: Unsubscribe | null = null;
@@ -57,9 +58,11 @@ export class TradeService {
 
       if (!user || !this.authService.firebaseConfigured()) {
         this.trades.set([]);
+        this.tradesLoaded.set(true);
         return;
       }
 
+      this.tradesLoaded.set(false);
       let active = true;
       void ensureAnonymousAuth()
         .then(() => {
@@ -73,9 +76,11 @@ export class TradeService {
                 ...(d.data() as Omit<TradeOffer, 'id'>),
               }));
               this.trades.set(list);
+              this.tradesLoaded.set(true);
             },
             (err) => {
               console.error('Erreur Firestore trades :', err);
+              this.tradesLoaded.set(true);
             }
           );
         })

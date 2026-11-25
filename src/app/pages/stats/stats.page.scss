@@ -258,6 +258,22 @@ ion-progress-bar {
   height: 44px;
 }
 
+.supervisor-log-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.log-select {
+  --border-radius: 12px;
+  --background: var(--ca-surface-subtle, #f5ede3);
+  --padding-start: 14px;
+  --padding-end: 14px;
+  min-height: 52px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
 .pre-advent-note {
   margin: 0;
   padding: 10px 12px;
@@ -361,6 +377,22 @@ ion-progress-bar {
 
 .add-qty {
   height: 44px;
+}
+
+.supervisor-log-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.log-select {
+  --border-radius: 12px;
+  --background: var(--ca-surface-subtle, #f5ede3);
+  --padding-start: 14px;
+  --padding-end: 14px;
+  min-height: 52px;
+  font-size: 0.86rem;
+  font-weight: 600;
 }
 
 .pre-advent-note {

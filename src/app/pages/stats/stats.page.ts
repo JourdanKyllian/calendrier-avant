@@ -12,6 +12,9 @@ import {
   IonHeader,
   IonIcon,
   IonInput,
+  IonSelect,
+  IonSelectOption,
+  IonSkeletonText,
   IonTitle,
   IonToast,
   IonToolbar,
@@ -43,6 +46,9 @@ import { ChocolateIconComponent } from '../../shared/chocolate-icon.component';
     IonButton,
     IonIcon,
     IonInput,
+    IonSelect,
+    IonSelectOption,
+    IonSkeletonText,
     IonToast,
   ],
   templateUrl: './stats.page.html',
@@ -63,9 +69,21 @@ export class StatsPage {
   newChocoTotal = 0;
   private readonly draftStocks = signal<Record<string, number>>({});
 
+  readonly logMemberUid = signal('');
+  readonly logSource = signal<'surplus' | 'member'>('surplus');
+  readonly logChocolate = signal('');
+
   readonly primarySupervisor = computed(
     () => this.calendarService.members().find((m) => m.isSupervisor) ?? null
   );
+
+  readonly logAvailableStock = computed(() => {
+    if (this.logSource() === 'surplus') {
+      return this.inventoryService.supervisorSurplus();
+    }
+    const uid = this.logMemberUid();
+    return uid ? this.inventoryService.getMemberStock(uid) : [];
+  });
 
   readonly myStock = computed(() => {
     const me = this.authService.currentMember();
@@ -133,6 +151,47 @@ export class StatsPage {
       this.toastMessage.set(`-1 ${chocolateName} noté comme mangé.`);
     } catch (err: unknown) {
       this.toastMessage.set(err instanceof Error ? err.message : 'Erreur.');
+    }
+  }
+
+  onLogSourceOrMemberChange(): void {
+    const options = this.logAvailableStock();
+    const current = this.logChocolate();
+    if (!options.some((o) => o.chocolateName === current)) {
+      this.logChocolate.set(options[0]?.chocolateName ?? '');
+    }
+  }
+
+  async submitSupervisorConsumption(): Promise<void> {
+    const me = this.authService.currentMember();
+    if (!me?.isSupervisor) return;
+    const choco = this.logChocolate().trim();
+    if (!choco) return;
+
+    const targetUid = this.logMemberUid();
+    const targetMember = this.calendarService.participants().find((p) => p.uid === targetUid) ?? null;
+
+    if (this.logSource() === 'member' && !targetMember) {
+      this.toastMessage.set('Choisis un membre pour déduire de son stock.');
+      return;
+    }
+
+    this.busy.set(true);
+    try {
+      await this.inventoryService.markEaten(choco, 1, {
+        sourceMemberUid: this.logSource() === 'surplus' ? me.uid : targetMember!.uid,
+        recipient:
+          this.logSource() === 'surplus' && targetMember
+            ? { uid: targetMember.uid, name: targetMember.name }
+            : null,
+      });
+      const whoLabel = targetMember ? targetMember.name : 'le surplus';
+      this.toastMessage.set(`Noté : -1 ${choco} (${whoLabel}).`);
+      this.onLogSourceOrMemberChange();
+    } catch (err: unknown) {
+      this.toastMessage.set(err instanceof Error ? err.message : 'Erreur.');
+    } finally {
+      this.busy.set(false);
     }
   }
 

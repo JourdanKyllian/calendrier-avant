@@ -84,7 +84,9 @@ service cloud.firestore {
           'memberUid',
           'chocolateName',
           'quantity',
-          'createdAt'
+          'createdAt',
+          'recipientUid',
+          'recipientName'
         ])
         && request.resource.data.memberUid is string
         && request.resource.data.chocolateName is string

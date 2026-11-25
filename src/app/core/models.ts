@@ -65,6 +65,8 @@ export interface ChocolateConsumption {
   chocolateName: string;
   quantity: number;
   createdAt: number;
+  recipientUid?: string;
+  recipientName?: string;
 }
 
 export interface ChocolateStockEntry {
