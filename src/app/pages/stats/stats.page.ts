@@ -117,15 +117,31 @@ export class StatsPage {
     return this.draftStocks()[item.id] ?? item.totalCount;
   }
 
+  hasPendingStockChange(item: ChocolateCatalogItem): boolean {
+    const draft = this.draftStocks()[item.id];
+    return draft !== undefined && draft !== item.totalCount;
+  }
+
   setDraftStock(id: string, raw: string): void {
-    const val = Math.max(0, Math.min(1000, Math.floor(Number(raw) || 0)));
+    const digits = raw.replace(/\D+/g, '');
+    const val = digits ? Math.max(0, Math.min(1000, Number(digits))) : 0;
     this.draftStocks.update((m) => ({ ...m, [id]: val }));
   }
 
-  async stepStock(item: ChocolateCatalogItem, delta: number): Promise<void> {
+  selectAllInput(input: HTMLInputElement): void {
+    setTimeout(() => {
+      try {
+        input.select();
+        input.setSelectionRange?.(0, input.value.length);
+      } catch {
+        // Ignore on input types that disallow selection range.
+      }
+    }, 0);
+  }
+
+  stepStock(item: ChocolateCatalogItem, delta: number): void {
     const next = Math.max(0, Math.min(1000, this.draftStock(item) + delta));
     this.draftStocks.update((m) => ({ ...m, [item.id]: next }));
-    await this.saveStock(item);
   }
 
   async saveStock(item: ChocolateCatalogItem): Promise<void> {
@@ -133,6 +149,11 @@ export class StatsPage {
     try {
       const next = this.draftStock(item);
       await this.configService.updateChocolateStock(item.id, next);
+      this.draftStocks.update((m) => {
+        const copy = { ...m };
+        delete copy[item.id];
+        return copy;
+      });
       this.toastMessage.set(`Stock ${item.name} enregistré (${next}).`);
     } catch (err: unknown) {
       this.toastMessage.set(err instanceof Error ? err.message : 'Erreur stock.');
