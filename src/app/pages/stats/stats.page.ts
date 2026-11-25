@@ -10,8 +10,6 @@ import {
   IonCardTitle,
   IonContent,
   IonHeader,
-  IonIcon,
-  IonInput,
   IonSelect,
   IonSelectOption,
   IonSkeletonText,
@@ -19,8 +17,6 @@ import {
   IonToast,
   IonToolbar,
 } from '@ionic/angular';
-import { addIcons } from 'ionicons';
-import { addOutline } from 'ionicons/icons';
 import { AuthService } from '../../core/auth.service';
 import { CalendarConfigService } from '../../core/calendar-config.service';
 import { CalendarService } from '../../core/calendar.service';
@@ -44,8 +40,6 @@ import { ChocolateIconComponent } from '../../shared/chocolate-icon.component';
     IonCardContent,
     IonBadge,
     IonButton,
-    IonIcon,
-    IonInput,
     IonSelect,
     IonSelectOption,
     IonSkeletonText,
@@ -65,8 +59,6 @@ export class StatsPage {
 
   readonly busy = signal(false);
   readonly toastMessage = signal('');
-  newChocoName = '';
-  newChocoTotal = 0;
   private readonly draftStocks = signal<Record<string, number>>({});
 
   readonly logMemberUid = signal('');
@@ -108,10 +100,6 @@ export class StatsPage {
   readonly surplusTotalCount = computed(() =>
     this.inventoryService.supervisorSurplus().reduce((sum, item) => sum + item.quantity, 0)
   );
-
-  constructor() {
-    addIcons({ addOutline });
-  }
 
   draftStock(item: ChocolateCatalogItem): number {
     return this.draftStocks()[item.id] ?? item.totalCount;
@@ -157,20 +145,6 @@ export class StatsPage {
       this.toastMessage.set(`Stock ${item.name} enregistré (${next}).`);
     } catch (err: unknown) {
       this.toastMessage.set(err instanceof Error ? err.message : 'Erreur stock.');
-    } finally {
-      this.busy.set(false);
-    }
-  }
-
-  async addChocolate(): Promise<void> {
-    this.busy.set(true);
-    try {
-      await this.configService.addChocolate(this.newChocoName, Number(this.newChocoTotal) || 0);
-      this.toastMessage.set(`${this.newChocoName.trim()} ajouté au stock.`);
-      this.newChocoName = '';
-      this.newChocoTotal = 0;
-    } catch (err: unknown) {
-      this.toastMessage.set(err instanceof Error ? err.message : 'Erreur ajout.');
     } finally {
       this.busy.set(false);
     }

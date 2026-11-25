@@ -60,9 +60,9 @@
       <div class="stats-cards-grid">
         <ion-card>
           <ion-card-header>
-            <ion-card-title>Réserve globale de chocolats</ion-card-title>
+            <ion-card-title>Surplus hors calendrier</ion-card-title>
             <p class="card-subtitle">
-              Saisis la quantité totale achetée. Les chocolats placés dans les 24 cases sont déduits automatiquement.
+              Indique uniquement les chocolats qu'il te reste en plus du calendrier (indépendant des 24 cases).
             </p>
           </ion-card-header>
           <ion-card-content>
@@ -70,19 +70,13 @@
               <div class="stock-list">
                 @for (item of configService.chocolates(); track item.id) {
                   @let used = configService.usedCountForChocolate(item);
-                  @let surplus = item.totalCount > 0 ? Math.max(0, item.totalCount - used) : null;
                   <div class="supervisor-stock-row">
                     <div class="stock-item-info">
                       <app-chocolate-icon [name]="item.name" [size]="22" />
                       <div>
                         <strong>{{ item.name }}</strong>
                         <span class="stock-meta">
-                          Placés : {{ used }}
-                          @if (surplus !== null) {
-                            • Surplus : <strong>{{ surplus }}</strong>
-                          } @else {
-                            • Sans limite
-                          }
+                          Surplus : <strong>{{ item.totalCount }}</strong> • Placés : {{ used }} • Total : <strong>{{ draftStock(item) + used }}</strong>
                         </span>
                       </div>
                     </div>
@@ -199,35 +193,6 @@
                 (click)="submitSupervisorConsumption()"
               >
                 Noter -1 mangé
-              </ion-button>
-            </div>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Ajouter un chocolat au stock</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <div class="add-choco-form">
-              <ion-input
-                fill="outline"
-                placeholder="Nom (ex. Kinder Bueno)"
-                [(ngModel)]="newChocoName"
-              ></ion-input>
-              <input
-                type="text"
-                inputmode="numeric"
-                pattern="[0-9]*"
-                class="stock-num-input add-qty"
-                [(ngModel)]="newChocoTotal"
-                (focus)="selectAllInput($any($event.target))"
-                (click)="selectAllInput($any($event.target))"
-                aria-label="Quantité totale"
-              />
-              <ion-button [disabled]="busy()" (click)="addChocolate()">
-                <ion-icon name="add-outline" slot="start"></ion-icon>
-                Ajouter
               </ion-button>
             </div>
           </ion-card-content>

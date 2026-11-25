@@ -101,8 +101,6 @@ export class InventoryService {
         .map((m) => m.uid)
     );
     const catalog = this.configService.chocolates();
-    const participantsCount = Math.max(1, this.calendarService.participants().length);
-    const dayConfigs = Object.values(this.configService.dayConfigsMap());
     const trades = this.tradeService.trades().filter((t) => t.status === 'accepted');
 
     const map = new Map<string, { label: string; qty: number }>();
@@ -117,10 +115,6 @@ export class InventoryService {
       if (item.totalCount > 0) {
         addQty(item.name, item.totalCount);
       }
-    }
-
-    for (const cfg of dayConfigs) {
-      addQty(cfg.chocolateName, -(cfg.quantityPerPerson * participantsCount));
     }
 
     for (const trade of trades) {

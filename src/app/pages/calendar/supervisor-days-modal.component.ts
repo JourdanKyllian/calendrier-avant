@@ -129,7 +129,7 @@ type DayFilter = 'all' | 'missing' | 'filled';
           <p class="field-label">Chocolat (1 clic) :</p>
           <div class="choco-grid">
             @for (item of configService.catalogItems(); track item.id) {
-              @let rem = configService.remainingForChocolate(item);
+              @let used = configService.usedCountForChocolate(item);
               <button
                 type="button"
                 class="choco-btn"
@@ -140,8 +140,8 @@ type DayFilter = 'all' | 'missing' | 'filled';
                   <app-chocolate-icon [name]="item.name" [size]="18" />
                   <span>{{ item.name }}</span>
                 </span>
-                @if (rem !== null) {
-                  <small class="stock-tag" [class.low]="rem <= 0">rest. {{ rem }}</small>
+                @if (used > 0) {
+                  <small class="stock-tag">{{ used }} placés</small>
                 }
               </button>
             }

@@ -189,12 +189,6 @@ export class CalendarConfigService {
     if (!current) {
       throw new Error('Chocolat introuvable en base.');
     }
-    const used = this.usedCountForChocolate(current);
-    if (count > 0 && count < used) {
-      throw new Error(
-        `Impossible : ${used} ${current.name} sont déjà placés dans les cases du calendrier.`
-      );
-    }
 
     await ensureAnonymousAuth();
     const { db } = getFirebaseClients();
@@ -220,24 +214,6 @@ export class CalendarConfigService {
     }
     if (!Number.isInteger(qty) || qty < 1 || qty > 20) {
       throw new Error('Le nombre par personne doit être entre 1 et 20.');
-    }
-
-    const chocoKey = cleanName.toLowerCase();
-    const catalogEntry = this.chocolates().find((c) => c.name.trim().toLowerCase() === chocoKey);
-    if (catalogEntry && catalogEntry.totalCount > 0) {
-      const participantsCount = Math.max(1, this.calendarService.participants().length);
-      let usedExcludingCurrentDay = 0;
-      for (const cfg of Object.values(this.dayConfigsMap())) {
-        if (cfg.dayNumber !== dayNumber && cfg.chocolateName.trim().toLowerCase() === chocoKey) {
-          usedExcludingCurrentDay += cfg.quantityPerPerson * participantsCount;
-        }
-      }
-      const totalAfterSave = usedExcludingCurrentDay + qty * participantsCount;
-      if (totalAfterSave > catalogEntry.totalCount) {
-        throw new Error(
-          `Stock insuffisant pour ${catalogEntry.name} : ${totalAfterSave} demandés sur ${catalogEntry.totalCount} en réserve.`
-        );
-      }
     }
 
     await ensureAnonymousAuth();
