@@ -26,6 +26,7 @@ interface FirestoreDoc {
     string,
     {
       stringValue?: string;
+      integerValue?: string;
       mapValue?: { fields?: Record<string, { stringValue?: string }> };
     }
   >;
@@ -89,6 +90,25 @@ async function listSubscriptions(projectId: string, idToken: string | null): Pro
     });
   }
   return subs;
+}
+
+async function listClaimedKeys(projectId: string, idToken: string | null): Promise<Set<string>> {
+  const headers: Record<string, string> = {};
+  if (idToken) headers['Authorization'] = `Bearer ${idToken}`;
+  const res = await fetch(`${firestoreBase(projectId)}/claims?pageSize=200`, { headers });
+  const keys = new Set<string>();
+  if (!res.ok) return keys;
+  const json = (await res.json()) as { documents?: FirestoreDoc[] };
+  for (const d of json.documents ?? []) {
+    const f = d.fields;
+    if (!f) continue;
+    const memberUid = f['memberUid']?.stringValue ?? '';
+    const dayNumber = Number(f['dayNumber']?.integerValue ?? 0);
+    if (memberUid && dayNumber >= 1 && dayNumber <= 24) {
+      keys.add(`${memberUid}:${dayNumber}`);
+    }
+  }
+  return keys;
 }
 
 async function deleteSubscription(
@@ -307,6 +327,9 @@ export default {
   async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
     const idToken = await getWorkerAuthToken(env.FIREBASE_API_KEY);
     const subs = await listSubscriptions(env.FIREBASE_PROJECT_ID, idToken);
+    if (subs.length === 0) return;
+
+    let claimedKeys: Set<string> | null = null;
     for (const sub of subs) {
       if (!/^\d{2}:\d{2}$/.test(sub.reminderTime)) continue;
       const [hh, mm] = sub.reminderTime.split(':').map(Number);
@@ -326,6 +349,11 @@ export default {
 
       if (sub.lastReminderDate === local.dateStr) continue;
       if (local.minutes >= targetMinutes && local.minutes < targetMinutes + 5) {
+        claimedKeys ??= await listClaimedKeys(env.FIREBASE_PROJECT_ID, idToken);
+        if (claimedKeys.has(`${sub.memberUid}:${day}`)) {
+          continue;
+        }
+
         const sent = await sendNgswPush(env, sub, idToken, {
           title: `🍫 Case ${day} décembre disponible !`,
           body: `Ta case ${day} du calendrier de l’Avent t’attend aujourd’hui.`,
