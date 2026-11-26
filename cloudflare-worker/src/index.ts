@@ -156,6 +156,7 @@ async function sendNgswPush(
 ): Promise<{ ok: boolean; status: number; detail: string }> {
   const pushSub: PushSubscription = {
     endpoint: sub.endpoint,
+    expirationTime: null,
     keys: {
       p256dh: sub.p256dh,
       auth: sub.auth,
